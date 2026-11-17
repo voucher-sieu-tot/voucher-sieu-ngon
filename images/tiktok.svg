@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 128" role="img" aria-label="TikTok Shop voucher">
+  <rect width="320" height="128" fill="#0F0F10"/>
+  <g fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(134 26)">
+    <path d="M6 4h26l20 20a6 6 0 0 1 0 8L40 44a6 6 0 0 1-8 0L12 24z" stroke="#25F4EE" transform="translate(-3 -2)"/>
+    <path d="M6 4h26l20 20a6 6 0 0 1 0 8L40 44a6 6 0 0 1-8 0L12 24z" stroke="#FE2C55" transform="translate(3 2)"/>
+    <path d="M6 4h26l20 20a6 6 0 0 1 0 8L40 44a6 6 0 0 1-8 0L12 24z" stroke="#fff"/>
+    <circle cx="22" cy="14" r="3" fill="#fff" stroke="none"/>
+  </g>
+</svg>
