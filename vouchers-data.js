@@ -17,12 +17,18 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T13:54:02.998Z",
+  "updated": "2026-11-20T13:59:19.886Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
-  "news": []
+  "news": [
+    {
+      "id": "9u0laap6az",
+      "at": "2026-11-20T13:59:13.451Z",
+      "text": "Chuẩn bị đến lượt săn sale/săn mã cuối trong ngày, chúc các bạn may mắn nhaaaaaa"
+    }
+  ]
 };
 const VOUCHERS = [
   {
