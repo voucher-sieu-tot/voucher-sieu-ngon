@@ -1,0 +1,16 @@
+{
+  "name": "DealNest - Voucher Shopee & TikTok Shop",
+  "short_name": "DealNest",
+  "description": "Tổng hợp ưu đãi mua sắm trên Shopee và TikTok Shop.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFBF5",
+  "theme_color": "#EE4D2D",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -56,6 +56,61 @@
     star: '<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>'
   };
 
+  /* ---------- Thông báo nhỏ, sao chép, chia sẻ ---------- */
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function toast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2200);
+  }
+
+  function copyText(text) {
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? "Đã sao chép link voucher" : "Không sao chép được, hãy thử lại");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast("Đã sao chép link voucher"); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function isNew(v) {
+    if (typeof v.added !== "string") return false;
+    var t = Date.parse(v.added);
+    if (isNaN(t)) return false;
+    var age = Date.now() - t;
+    return age >= -3600e3 && age < 48 * 3600e3;
+  }
+
+  var settings = typeof SITE_SETTINGS === "object" && SITE_SETTINGS ? SITE_SETTINGS : {};
+
+  /* Lịch đổi link do bạn hẹn trong admin: đến giờ thì voucher dùng link mới đã chọn */
+  (function applySchedule() {
+    if (!Array.isArray(settings.schedule) || typeof VOUCHERS === "undefined") return;
+    var now = Date.now();
+    settings.schedule
+      .filter(function (e) { return e && typeof e.voucherId === "string" && Date.parse(e.at) <= now && safeUrl(e.link); })
+      .sort(function (a, b) { return Date.parse(a.at) - Date.parse(b.at); })
+      .forEach(function (e) {
+        VOUCHERS.forEach(function (v) { if (v.id === e.voucherId) v.link = e.link; });
+      });
+  })();
+  var reportUrl = safeUrl(settings.reportUrl);
+
   function imageFor(v) {
     if (v.image) return v.image;
     return (typeof PLATFORM_IMAGES === "object" && PLATFORM_IMAGES[v.platform]) || "";
@@ -89,27 +144,25 @@
     return wrap;
   }
 
-  /* ---------- Build one card ---------- */
+  /* ---------- Build one card (kiểu vé: phần trên là mức giảm, phần dưới là chi tiết) ---------- */
   function buildCard(v, index) {
     var slot = el("div", "card-slot reveal");
     if (v.featured) slot.className += " float";
     slot.style.transitionDelay = Math.min(index, 5) * 60 + "ms";
 
-    var card = el("article", "card " + v.platform);
+    var card = el("article", "card " + v.platform + (v.featured ? " hot" : ""));
 
-    var media = el("div", "media");
+    var stub = el("div", "stub");
     var src = imageFor(v);
     if (src) {
       var img = document.createElement("img");
+      img.className = "stub-img";
       img.src = src;
-      img.alt = "Voucher " + (NAMES[v.platform] || "");
+      img.alt = "";
       img.loading = "lazy";
       img.decoding = "async";
-      media.appendChild(img);
+      stub.appendChild(img);
     }
-    card.appendChild(media);
-
-    var body = el("div", "body");
 
     var top = el("div", "top");
     var badge = el("span", "badge");
@@ -119,6 +172,7 @@
     badge.appendChild(el("span", null, NAMES[v.platform] || ""));
     top.appendChild(badge);
     var tags = el("div", "tags");
+    if (isNew(v)) tags.appendChild(el("span", "tag new", "Mới"));
     if (v.tag) tags.appendChild(el("span", "tag vip", String(v.tag)));
     if (v.featured) {
       var tag = el("span", "tag");
@@ -127,14 +181,19 @@
       tags.appendChild(tag);
     }
     if (tags.childNodes.length) top.appendChild(tags);
-    body.appendChild(top);
+    stub.appendChild(top);
 
-    var info = el("div");
-    info.appendChild(el("h3", null, v.title));
-    info.appendChild(el("p", "discount", v.discount));
-    if (v.minimum) info.appendChild(el("p", "min", "Cho đơn từ " + v.minimum));
-    if (v.maximum) info.appendChild(el("p", "min", "Giảm tối đa " + v.maximum));
-    body.appendChild(info);
+    stub.appendChild(el("p", "discount", v.discount));
+    if (v.minimum) stub.appendChild(el("p", "min", "Cho đơn từ " + v.minimum));
+    if (v.maximum) stub.appendChild(el("p", "min", "Giảm tối đa " + v.maximum));
+    card.appendChild(stub);
+
+    var perf = el("div", "perf");
+    perf.setAttribute("aria-hidden", "true");
+    card.appendChild(perf);
+
+    var body = el("div", "body");
+    body.appendChild(el("h3", null, v.title));
     var usageEl = buildUsage(v);
     if (usageEl) body.appendChild(usageEl);
 
@@ -154,6 +213,7 @@
       a.href = url; // exactly the link you wrote
       a.target = "_blank";
       a.rel = "sponsored noopener noreferrer";
+      a.setAttribute("data-track", (NAMES[v.platform] || v.platform) + " | " + v.discount + (v.minimum ? " | đơn từ " + v.minimum : "") + " | " + url.replace(/^https?:\/\//, "").slice(-24));
       a.appendChild(document.createTextNode("Lấy voucher"));
       a.appendChild(svg(ICON.out, 14));
       foot.appendChild(a);
@@ -166,6 +226,51 @@
       foot.appendChild(b);
     }
     body.appendChild(foot);
+
+    /* Nút phụ: sao chép / chia sẻ / báo mã hết (chỉ khi có link dùng được) */
+    {
+      var tools = el("div", "tools");
+      var favBtn = el("button", "tool fav");
+      favBtn.type = "button";
+      var paintFav = function () {
+        var on = isFav(v);
+        favBtn.textContent = on ? "♥ Đã lưu" : "♡ Lưu";
+        favBtn.classList.toggle("on", on);
+        favBtn.setAttribute("aria-pressed", String(on));
+      };
+      paintFav();
+      favBtn.addEventListener("click", function () {
+        var k = favKey(v), i = favs.indexOf(k);
+        if (i === -1) favs.push(k); else favs.splice(i, 1);
+        saveFavs();
+        updateSavedCount();
+        if (activeTab === "saved") render(searchInput.value); else paintFav();
+      });
+      tools.appendChild(favBtn);
+      if (url && !expired) {
+        var copyBtn = el("button", "tool", "Sao chép link");
+        copyBtn.type = "button";
+        copyBtn.addEventListener("click", function () { copyText(url); });
+        tools.appendChild(copyBtn);
+        if (navigator.share) {
+          var shareBtn = el("button", "tool", "Chia sẻ");
+          shareBtn.type = "button";
+          shareBtn.addEventListener("click", function () {
+            navigator.share({ title: v.title + " " + v.discount, text: (NAMES[v.platform] || "Voucher") + ": " + v.discount, url: url })
+              .catch(function () {});
+          });
+          tools.appendChild(shareBtn);
+        }
+      }
+      if (reportUrl) {
+        var rep = el("a", "tool", "Báo mã hết");
+        rep.href = reportUrl;
+        rep.target = "_blank";
+        rep.rel = "noopener noreferrer";
+        tools.appendChild(rep);
+      }
+      body.appendChild(tools);
+    }
     card.appendChild(body);
     slot.appendChild(card);
 
@@ -205,16 +310,37 @@
   var grids = {
     featured: document.getElementById("gridFeatured"),
     shopee: document.getElementById("gridShopee"),
-    tiktok: document.getElementById("gridTiktok")
+    tiktok: document.getElementById("gridTiktok"),
+    saved: document.getElementById("gridSaved")
   };
   var sections = {
     featured: document.getElementById("featured"),
     shopee: document.getElementById("shopee"),
-    tiktok: document.getElementById("tiktok")
+    tiktok: document.getElementById("tiktok"),
+    saved: document.getElementById("saved")
   };
+
+  /* ---------- Voucher yêu thích (lưu ngay trên máy người xem) ---------- */
+  var FAVKEY = "dealnest_fav";
+  var favs = [];
+  try {
+    var rawFav = JSON.parse(localStorage.getItem(FAVKEY) || "[]");
+    if (Array.isArray(rawFav)) favs = rawFav.filter(function (s) { return typeof s === "string"; }).slice(0, 200);
+  } catch (e) {}
+  function favKey(v) { return v.id ? "id:" + v.id : v.platform + "|" + (v.link || "") + "|" + v.discount; }
+  function isFav(v) { return favs.indexOf(favKey(v)) !== -1; }
+  function saveFavs() { try { localStorage.setItem(FAVKEY, JSON.stringify(favs)); } catch (e) {} }
+  function updateSavedCount() {
+    var n = list.filter(isFav).length;
+    var c = document.getElementById("savedCount");
+    if (c) c.textContent = n ? "(" + n + ")" : "";
+  }
   var emptyBox = document.getElementById("empty");
   var searchInput = document.getElementById("search");
   var clearBtn = document.getElementById("clear");
+
+  var activeTab = "all";
+  var tabsEl = document.getElementById("tabs");
 
   var list = [];
   if (typeof VOUCHERS !== "undefined" && Array.isArray(VOUCHERS)) {
@@ -223,7 +349,7 @@
     });
   } else {
     emptyBox.hidden = false;
-    emptyBox.textContent = "Không đọc được file vouchers.js. Hãy kiểm tra xem có thiếu dấu phẩy hoặc dấu ngoặc không.";
+    emptyBox.textContent = "Không đọc được file vouchers-data.js. Hãy kiểm tra xem có thiếu dấu phẩy hoặc dấu ngoặc không.";
   }
 
   function fill(key, items, emptyText) {
@@ -240,6 +366,17 @@
     });
   }
 
+  /* Nút "Xem tất cả" dưới mục sàn khi một phần voucher đang nằm ở mục Nổi bật */
+  function seeAll(key, total, shown, name) {
+    var old = sections[key].querySelector(".see-all");
+    if (old) old.remove();
+    if (activeTab !== "all" || total <= shown) return;
+    var b = el("button", "see-all", "Xem tất cả " + total + " voucher " + name);
+    b.type = "button";
+    b.addEventListener("click", function () { setTab(key); sections[key].scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); });
+    sections[key].appendChild(b);
+  }
+
   function render(query) {
     var q = (query || "").trim().toLowerCase();
     var items = q
@@ -252,20 +389,56 @@
     var shopee = items.filter(function (v) { return v.platform === "shopee"; });
     var tiktok = items.filter(function (v) { return v.platform === "tiktok"; });
 
-    sections.featured.hidden = featured.length === 0;
-    sections.shopee.hidden = !!q && shopee.length === 0;
-    sections.tiktok.hidden = !!q && tiktok.length === 0;
+    var tab = activeTab;
+    var savedItems = items.filter(isFav);
+    sections.saved.hidden = tab !== "saved";
+    if (tab === "saved") fill("saved", savedItems, "Chưa lưu voucher nào. Bấm “♡ Lưu” trên thẻ voucher để lưu lại.");
+    else grids.saved.textContent = "";
+    updateSavedCount();
+    sections.featured.hidden = featured.length === 0 || (tab !== "all" && tab !== "featured");
+    sections.shopee.hidden = (!!q && shopee.length === 0) || (tab !== "all" && tab !== "shopee");
+    sections.tiktok.hidden = (!!q && tiktok.length === 0) || (tab !== "all" && tab !== "tiktok");
+
+    /* Tab "Tất cả": voucher nổi bật chỉ hiện ở mục Nổi bật, tránh lặp lại */
+    var dedupe = tab === "all" && featured.length > 0;
+    var shopeeShown = dedupe ? shopee.filter(function (v) { return !v.featured; }) : shopee;
+    var tiktokShown = dedupe ? tiktok.filter(function (v) { return !v.featured; }) : tiktok;
 
     fill("featured", featured);
-    fill("shopee", shopee, "Chưa có voucher Shopee.");
-    fill("tiktok", tiktok, "Chưa có voucher TikTok Shop.");
+    fill("shopee", shopeeShown, shopee.length ? "" : "Chưa có voucher Shopee.");
+    fill("tiktok", tiktokShown, tiktok.length ? "" : "Chưa có voucher TikTok Shop.");
+    seeAll("shopee", shopee.length, shopeeShown.length, "Shopee");
+    seeAll("tiktok", tiktok.length, tiktokShown.length, "TikTok Shop");
+    if (dedupe && shopeeShown.length === 0 && shopee.length > 0) sections.shopee.hidden = true;
+    if (dedupe && tiktokShown.length === 0 && tiktok.length > 0) sections.tiktok.hidden = true;
 
     if (q && items.length === 0) {
       emptyBox.hidden = false;
       emptyBox.textContent = "Không tìm thấy voucher nào khớp với “" + query.trim() + "”.";
+    } else if (tab === "featured" && featured.length === 0 && list.length > 0) {
+      emptyBox.hidden = false;
+      emptyBox.textContent = "Chưa có voucher nổi bật.";
     } else if (list.length > 0 || typeof VOUCHERS !== "undefined") {
       emptyBox.hidden = true;
     }
+  }
+
+  function setTab(name) {
+    activeTab = name;
+    if (tabsEl) {
+      tabsEl.querySelectorAll(".tab").forEach(function (b) {
+        var on = b.getAttribute("data-tab") === name;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
+    }
+    render(searchInput.value);
+  }
+  if (tabsEl) {
+    tabsEl.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest(".tab") : null;
+      if (b) setTab(b.getAttribute("data-tab"));
+    });
   }
 
   render("");
@@ -306,6 +479,7 @@
       var target = document.getElementById(id);
       if (!target) return;
       e.preventDefault();
+      if (target.hidden && activeTab !== "all") setTab("all");
       navLinks.classList.remove("open");
       menuBtn.setAttribute("aria-expanded", "false");
       target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });

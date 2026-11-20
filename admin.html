@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'"
+    />
+    <title>Quản trị — DealNest</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <noscript><p class="center pad">Trang quản trị cần bật JavaScript.</p></noscript>
+
+    <!-- ============ Cài đặt lần đầu ============ -->
+    <main id="screen-setup" class="auth-wrap" hidden>
+      <form id="setupForm" class="auth-card" autocomplete="off">
+        <h1>Cài đặt quản trị lần đầu</h1>
+        <p class="muted">
+          Làm một lần trên mỗi thiết bị. Khóa GitHub của bạn sẽ được mã hóa bằng mật khẩu và mã PIN rồi mới lưu vào
+          trình duyệt này.
+        </p>
+
+        <details class="help">
+          <summary>Cách tạo khóa GitHub (làm 1 lần)</summary>
+          <ol>
+            <li>Vào GitHub, bấm ảnh đại diện, chọn <b>Settings</b>.</li>
+            <li>Kéo xuống cuối menu trái, chọn <b>Developer settings</b>, rồi <b>Personal access tokens → Fine-grained tokens</b>.</li>
+            <li>Bấm <b>Generate new token</b>. Đặt tên (ví dụ <i>admin-web</i>), chọn hạn dùng (ví dụ 90 ngày).</li>
+            <li>Mục <b>Repository access</b>: chọn <b>Only select repositories</b> và chọn đúng kho chứa web này.</li>
+            <li>Mục <b>Permissions → Repository permissions → Contents</b>: chọn <b>Read and write</b>.</li>
+            <li>Bấm <b>Generate token</b>, sao chép chuỗi bắt đầu bằng <code>github_pat_</code> và dán vào ô bên dưới.</li>
+          </ol>
+        </details>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="sOwner">Tên tài khoản GitHub</label>
+            <input id="sOwner" type="text" autocapitalize="off" spellcheck="false" required />
+          </div>
+          <div class="field">
+            <label for="sRepo">Tên kho (repository)</label>
+            <input id="sRepo" type="text" autocapitalize="off" spellcheck="false" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="sBranch">Nhánh</label>
+          <input id="sBranch" type="text" value="main" autocapitalize="off" spellcheck="false" required />
+        </div>
+        <div class="field">
+          <label for="sToken">Khóa GitHub (token)</label>
+          <input id="sToken" type="password" autocomplete="off" spellcheck="false" required />
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="sPass">Đặt mật khẩu (từ 10 ký tự)</label>
+            <input id="sPass" type="password" autocomplete="new-password" required />
+          </div>
+          <div class="field">
+            <label for="sPass2">Nhập lại mật khẩu</label>
+            <input id="sPass2" type="password" autocomplete="new-password" required />
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="sPin">Đặt mã PIN (6 đến 8 chữ số)</label>
+            <input id="sPin" type="password" inputmode="numeric" autocomplete="off" required />
+          </div>
+          <div class="field">
+            <label for="sPin2">Nhập lại mã PIN</label>
+            <input id="sPin2" type="password" inputmode="numeric" autocomplete="off" required />
+          </div>
+        </div>
+        <p id="setupError" class="error" role="alert" hidden></p>
+        <button id="setupBtn" type="submit" class="btn btn-primary full">Kiểm tra &amp; lưu</button>
+        <p class="tiny">Hãy ghi nhớ mật khẩu và mã PIN. Nếu quên, bạn chỉ cần tạo lại khóa GitHub và cài đặt lại.</p>
+      </form>
+    </main>
+
+    <!-- ============ Màn hình khóa ============ -->
+    <main id="screen-lock" class="auth-wrap" hidden>
+      <form id="lockForm" class="auth-card" autocomplete="off">
+        <h1>Đăng nhập quản trị</h1>
+        <p class="muted">Nhập mật khẩu và mã PIN để mở khóa.</p>
+        <div class="field">
+          <label for="lPass">Mật khẩu</label>
+          <input id="lPass" type="password" autocomplete="current-password" required />
+        </div>
+        <div class="field">
+          <label for="lPin">Mã PIN</label>
+          <input id="lPin" type="password" inputmode="numeric" autocomplete="off" required />
+        </div>
+        <p id="lockError" class="error" role="alert" hidden></p>
+        <button id="lockBtn" type="submit" class="btn btn-primary full">Mở khóa</button>
+        <p class="tiny"><button id="resetDevice" type="button" class="linkbtn">Quên mật khẩu / cài đặt lại thiết bị này</button></p>
+      </form>
+    </main>
+
+    <!-- ============ Bảng quản lý ============ -->
+    <div id="screen-panel" hidden>
+      <header class="topbar">
+        <div class="bar-inner">
+          <h1 class="bar-title">Quản trị voucher</h1>
+          <div class="bar-actions">
+            <a class="btn btn-ghost" href="./" target="_blank" rel="noopener noreferrer">Xem web</a>
+            <button id="lockNow" type="button" class="btn btn-ghost">Khóa</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="panel">
+        <div class="toolbar">
+          <button id="addBtn" type="button" class="btn btn-ghost">+ Thêm voucher</button>
+          <button id="bulkBtn" type="button" class="btn btn-ghost">+ Thêm nhiều link</button>
+          <span id="dirtyNote" class="dirty" hidden>Có thay đổi chưa lưu</span>
+          <span class="spacer"></span>
+          <button id="discardBtn" type="button" class="btn btn-ghost" disabled>Hủy thay đổi</button>
+          <button id="saveBtn" type="button" class="btn btn-primary" disabled>Lưu &amp; đăng lên web</button>
+        </div>
+
+        <p id="panelMsg" class="notice" role="status" hidden></p>
+        <p id="panelError" class="error box" role="alert" hidden></p>
+
+        <details id="settingsBox" class="settings" hidden>
+          <summary>Cài đặt web: banner, liên hệ &amp; nút “Báo mã hết”</summary>
+          <div class="checks">
+            <label><input id="stBanner" type="checkbox" /> Hiện banner trên đầu trang web (ví dụ dịp 11.11, 12.12)</label>
+          </div>
+          <div class="field">
+            <label for="stBannerText">Nội dung banner (tối đa 140 ký tự)</label>
+            <input id="stBannerText" type="text" maxlength="140" placeholder="Siêu sale 12.12: săn mã ngay hôm nay!" />
+          </div>
+          <div class="field">
+            <label for="stBannerLink">Link khi bấm vào banner (tùy chọn)</label>
+            <input id="stBannerLink" type="url" inputmode="url" placeholder="https://" />
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label for="stTiktok">Link liên hệ TikTok (để trống thì ẩn)</label>
+              <input id="stTiktok" type="url" inputmode="url" placeholder="https://www.tiktok.com/@..." />
+            </div>
+            <div class="field">
+              <label for="stThreads">Link liên hệ Threads (để trống thì ẩn)</label>
+              <input id="stThreads" type="url" inputmode="url" placeholder="https://www.threads.com/@..." />
+            </div>
+          </div>
+          <div class="field">
+            <label for="stGoat">Mã GoatCounter để thống kê lượt xem và lượt bấm (tùy chọn, để trống thì tắt)</label>
+            <input id="stGoat" type="text" autocapitalize="off" spellcheck="false" placeholder="ví dụ: ten-cua-ban" />
+            <p class="tiny">Đăng ký miễn phí tại goatcounter.com, chọn một mã (code), dán mã đó vào đây. Số liệu xem trên goatcounter.com.</p>
+          </div>
+          <div class="field">
+            <label for="stReport">Link biểu mẫu “Báo mã hết” (ví dụ Google Form; để trống thì ẩn nút)</label>
+            <input id="stReport" type="url" inputmode="url" placeholder="https://forms.gle/..." />
+          </div>
+          <p id="settingsError" class="error" role="alert" hidden></p>
+        </details>
+
+        <details id="stashBox" class="settings" hidden>
+          <summary>Kho lưu link &amp; hẹn giờ đổi link</summary>
+          <p class="tiny">
+            Cất sẵn link hoặc mã chưa dùng, rồi gán vào voucher khi cần hoặc hẹn giờ. Link nào lên voucher nào do bạn chọn.
+            Lưu ý: kho lưu nằm trong file dữ liệu của web, nên người biết xem mã nguồn vẫn có thể thấy các link và mã đang cất.
+            Đừng cất thứ gì bạn muốn giữ riêng tư.
+          </p>
+          <div class="grid2">
+            <div class="field">
+              <label for="kLink">Link</label>
+              <input id="kLink" type="url" inputmode="url" placeholder="https://" />
+            </div>
+            <div class="field">
+              <label for="kCode">Mã chữ (tùy chọn)</label>
+              <input id="kCode" type="text" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="kNote">Ghi chú (tùy chọn, ví dụ “Giảm 100k - dùng buổi tối”)</label>
+            <input id="kNote" type="text" maxlength="120" />
+          </div>
+          <button id="kAdd" type="button" class="btn btn-ghost btn-sm">+ Cất vào kho</button>
+          <p id="stashError" class="error" role="alert" hidden></p>
+          <ul id="stashList" class="stash-list"></ul>
+          <h3 class="sub-h">Lịch đổi link</h3>
+          <p class="tiny">Đến giờ hẹn, web công khai tự dùng link mới cho voucher đó. Giờ tính theo đồng hồ của người xem.</p>
+          <ul id="schedList" class="stash-list"></ul>
+          <button id="schedClean" type="button" class="btn btn-ghost btn-sm">Dọn các lịch đã chạy vào danh sách voucher</button>
+        </details>
+
+        <p id="loading" class="muted center pad">Đang tải danh sách voucher…</p>
+        <ul id="list" class="list"></ul>
+        <p class="tiny center">
+          Sau khi bấm “Lưu &amp; đăng lên web”, web công khai sẽ cập nhật sau khoảng 1 đến 2 phút. Trang tự khóa sau 15 phút
+          không thao tác.
+        </p>
+      </main>
+    </div>
+
+    <!-- ============ Thêm nhiều link ============ -->
+    <dialog id="bulkDlg" class="dlg" aria-labelledby="bulkTitle">
+      <form id="bulkForm" novalidate>
+        <h2 id="bulkTitle">Thêm nhiều voucher cùng lúc</h2>
+        <p class="muted small">
+          Mỗi dòng một voucher. Dạng đầy đủ: <code>link | mức giảm | đơn tối thiểu</code>. Hai phần sau có thể bỏ nếu đã điền
+          giá trị mặc định bên dưới.
+        </p>
+        <div class="field">
+          <label for="bLines">Danh sách (tối đa 50 dòng)</label>
+          <textarea id="bLines" rows="7" spellcheck="false" placeholder="https://s.shopee.vn/abc | Giảm 100k&#10;https://s.shopee.vn/def | Giảm 50k | 300k&#10;https://s.shopee.vn/ghi"></textarea>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="bPlatform">Sàn</label>
+            <select id="bPlatform"><option value="shopee">Shopee</option><option value="tiktok">TikTok Shop</option></select>
+          </div>
+          <div class="field">
+            <label for="bTitle">Tên voucher chung (tùy chọn)</label>
+            <input id="bTitle" type="text" placeholder="Để trống = Voucher + tên sàn" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="bDiscount">Mức giảm mặc định</label>
+            <input id="bDiscount" type="text" placeholder="Giảm 50K" />
+          </div>
+          <div class="field">
+            <label for="bMin">Đơn tối thiểu mặc định</label>
+            <input id="bMin" type="text" placeholder="0đ" />
+          </div>
+        </div>
+        <div class="checks">
+          <label><input id="bFeatured" type="checkbox" /> Hiện ở mục Voucher nổi bật</label>
+        </div>
+        <p id="bulkInfo" class="muted small" role="status"></p>
+        <p id="bulkError" class="error" role="alert" hidden></p>
+        <div class="dlg-actions">
+          <button id="bulkCancel" type="button" class="btn btn-ghost">Hủy</button>
+          <button type="submit" class="btn btn-primary">Thêm vào danh sách</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- ============ Form thêm / sửa ============ -->
+    <dialog id="formDlg" class="dlg" aria-labelledby="formTitle">
+      <form id="vForm" novalidate>
+        <h2 id="formTitle">Thêm voucher</h2>
+        <div class="grid2">
+          <div class="field">
+            <label for="fPlatform">Sàn</label>
+            <select id="fPlatform">
+              <option value="shopee">Shopee</option>
+              <option value="tiktok">TikTok Shop</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fDiscount">Mức giảm</label>
+            <input id="fDiscount" type="text" placeholder="Giảm 50K" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="fTitle">Tên voucher</label>
+          <input id="fTitle" type="text" />
+        </div>
+        <div class="field">
+          <label for="fLink">Link nhận voucher (nút “Lấy voucher” sẽ mở đúng link này)</label>
+          <input id="fLink" type="url" inputmode="url" placeholder="https://" />
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="fMin">Đơn tối thiểu</label>
+            <input id="fMin" type="text" placeholder="300K" />
+          </div>
+          <div class="field">
+            <label for="fMax">Giảm tối đa</label>
+            <input id="fMax" type="text" placeholder="100K" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="fExpMode">Hạn dùng</label>
+            <select id="fExpMode">
+              <option value="none">Không hiển thị</option>
+              <option value="fixed">Một ngày cố định</option>
+            </select>
+          </div>
+          <div class="field" id="fExpWrap" hidden>
+            <label for="fExpDate">Ngày hết hạn</label>
+            <input id="fExpDate" type="date" />
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="fTag">Nhãn nhỏ (ví dụ ShopeeVIP)</label>
+            <input id="fTag" type="text" />
+          </div>
+          <div class="field">
+            <label for="fUsed">% đã dùng (chỉ điền nếu là số thật)</label>
+            <input id="fUsed" type="number" min="0" max="100" step="1" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="fImage">Ảnh riêng cho voucher (tùy chọn)</label>
+          <input id="fImage" type="text" placeholder="images/ten-anh.png hoặc https://..." />
+        </div>
+        <div class="checks">
+          <label><input id="fFeatured" type="checkbox" /> Hiện ở mục Voucher nổi bật</label>
+        </div>
+        <p id="formError" class="error" role="alert" hidden></p>
+        <div class="dlg-actions">
+          <button id="formCancel" type="button" class="btn btn-ghost">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xong</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

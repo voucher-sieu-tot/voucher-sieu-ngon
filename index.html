@@ -15,8 +15,19 @@
       property="og:description"
       content="Tổng hợp ưu đãi mua sắm được chọn lọc, đáng để bạn xem qua."
     />
+    <meta property="og:image" content="https://TEN-BAN.github.io/TEN-KHO/images/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://TEN-BAN.github.io/TEN-KHO/images/og.png" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="images/icon-180.png" />
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Bấm vào voucher mà ra trang sản phẩm, vậy là sao?", "acceptedAnswer": {"@type": "Answer", "text": "Các mã giá trị cao thường là mã ẩn. Nếu bấm vào mà Shopee hoặc TikTok Shop mở trang sản phẩm thay vì hộp nhận mã, có thể mã đã hết. Bạn hãy thử các voucher khác và quay lại kiểm tra thường xuyên."}}, {"@type": "Question", "name": "Vì sao hôm nay mình không nhận được mã?", "acceptedAnswer": {"@type": "Answer", "text": "Mỗi ngày chỉ một số tài khoản ngẫu nhiên nhận được mã, và khung giờ cũng khác nhau giữa các tài khoản. Hãy kiên nhẫn thử lại vào các khung giờ thường gặp (0h, 9h, 12h, 15h, 18h, 21h theo giờ Việt Nam) hoặc vào ngày hôm sau."}}, {"@type": "Question", "name": "Nhận mã rồi thì dùng thế nào?", "acceptedAnswer": {"@type": "Answer", "text": "Sau khi lưu mã vào ví voucher trên ứng dụng, bạn thêm sản phẩm vào giỏ hàng, vào bước thanh toán và chọn voucher đã lưu. Hãy xem kỹ điều kiện như đơn tối thiểu và mức giảm tối đa của từng mã."}}, {"@type": "Question", "name": "Web này có phải của Shopee hoặc TikTok Shop không?", "acceptedAnswer": {"@type": "Answer", "text": "Không. Đây là trang độc lập, không liên kết với và không được bảo trợ hay xác nhận bởi Shopee hoặc TikTok Shop. Ưu đãi và điều kiện áp dụng do nền tảng quy định và có thể thay đổi."}}, {"@type": "Question", "name": "Làm sao để không bỏ lỡ giờ săn mã?", "acceptedAnswer": {"@type": "Answer", "text": "Bạn có thể bấm “Thêm nhắc giờ vào lịch” ở phần lưu ý để lịch trên điện thoại hoặc máy tính nhắc trước mỗi khung giờ 5 phút, hoặc cài web này lên màn hình chính để mở nhanh."}}]}</script>
+
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="extras.css" />
+    <script src="theme.js"></script>
   </head>
   <body>
     <a class="skip" href="#main">Chuyển đến nội dung chính</a>
@@ -33,7 +44,11 @@
           <li><a href="#featured" data-scroll>Nổi bật</a></li>
           <li><a href="#shopee" data-scroll>Shopee</a></li>
           <li><a href="#tiktok" data-scroll>TikTok Shop</a></li>
+          <li><a href="#faq" data-scroll>Hỏi đáp</a></li>
+          <li><a href="#contact" data-scroll>Liên hệ</a></li>
         </ul>
+        <button class="install-btn" id="installBtn" type="button" hidden>📲 Cài web</button>
+        <button class="theme-btn" id="themeBtn" type="button" aria-label="Chuyển giao diện sáng/tối"><span aria-hidden="true"></span></button>
         <button class="menu-btn" id="menuBtn" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="navLinks">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
@@ -45,13 +60,23 @@
       <span class="blob b2" aria-hidden="true"></span>
       <span class="blob b3" aria-hidden="true"></span>
       <div class="hero-inner">
+        <p class="golden-pill" id="goldenPill" hidden><i aria-hidden="true"></i>Đang trong khung giờ săn mã thường gặp</p>
+        <p class="promo" id="promo" hidden></p>
         <h1>Khám phá <span class="accent">ưu đãi tốt nhất</span> dành cho bạn.</h1>
         <p class="sub">Tổng hợp các ưu đãi mua sắm được chọn lọc, đáng để bạn xem qua.</p>
+        <p class="updated" id="updatedAt" hidden></p>
         <form class="search glass" role="search" id="searchForm">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input id="search" type="search" placeholder="Tìm voucher…" aria-label="Tìm voucher" autocomplete="off" />
           <button type="button" id="clear" class="clear" aria-label="Xóa tìm kiếm" hidden>×</button>
         </form>
+        <div class="tabs" id="tabs" role="group" aria-label="Lọc voucher">
+          <button type="button" class="tab on" data-tab="all" aria-pressed="true">Tất cả</button>
+          <button type="button" class="tab" data-tab="featured" aria-pressed="false">Nổi bật</button>
+          <button type="button" class="tab" data-tab="shopee" aria-pressed="false">Shopee</button>
+          <button type="button" class="tab" data-tab="tiktok" aria-pressed="false">TikTok Shop</button>
+          <button type="button" class="tab" data-tab="saved" aria-pressed="false">♥ Đã lưu <span id="savedCount"></span></button>
+        </div>
       </div>
     </section>
 
@@ -64,22 +89,22 @@
             <h2 id="tips-title">Lưu ý khi săn mã</h2>
           </div>
         </div>
-        <div class="tips-copy">
+        <p class="slot-bar" id="slotBar" hidden></p>
+        <button type="button" class="ics-btn" id="icsBtn">📅 Thêm nhắc giờ vào lịch</button>
+        <details class="tips-more">
+          <summary>Xem lưu ý khi săn mã</summary>
+          <div class="tips-copy">
           <p>
-            Một số liên kết là liên kết tiếp thị. Website có thể nhận hoa hồng nếu bạn mua hàng qua
-            liên kết; mỗi nút sẽ mở đúng đường dẫn được ghi cho voucher đó.
-          </p>
-          <p>
-            Hiện tại website chỉ hỗ trợ Shopee; TikTok Shop sẽ được cập nhật sớm nhất có thể.
+            Website có voucher Shopee và TikTok Shop.
             Mỗi ngày chỉ một số tài khoản ngẫu nhiên nhận được mã. Nếu hôm nay bạn chưa nhận được mã,
             hãy thử lại vào ngày mai.
           </p>
-        </div>
-        <ul class="tips-list">
-          <li>Mã có thể hết rất nhanh, bạn nên thường xuyên vào kiểm tra lại.</li>
+          </div>
+          <ul class="tips-list">
+          <li>Các bạn hết sức lưu ý nhé, mã thường hết rất nhanh. Các bạn nên thường xuyên vào kiểm tra bằng cách click vào các voucher.</li>
           <li>
-            Đây là mã ẩn: nếu bấm vào mà Shopee mở trang sản phẩm, có thể mã đã hết.
-            Hãy thử các mã khác. Hoặc bạn có thể cân nhắc mua sản phẩm hiện ra vì thuật toán của web luôn tìm giá tốt nhất.
+            Các mã giá trị cao thường là các mã ẩn: nếu bấm vào mà mở trang sản phẩm, có thể mã đã hết.
+            Hãy thử các mã khác, hoặc bạn có thể cân nhắc mua sản phẩm hiện ra nếu thấy phù hợp.
           </li>
           <li>
             Khung giờ Flash Sale ngày thường thường gặp là 0h, 9h, 12h, 15h, 18h và 21h
@@ -87,6 +112,7 @@
             <a href="https://ghn.vn/blogs/tip-ban-hang/cap-nhat-khung-gio-san-sale-shopee" target="_blank" rel="noopener noreferrer">Tham khảo GHN</a>.
           </li>
         </ul>
+        </details>
       </aside>
 
       <p id="empty" class="empty wrap" hidden></p>
@@ -105,6 +131,26 @@
         <div class="reveal"><h2>Voucher TikTok Shop</h2><p class="muted">Ưu đãi dành cho người mua sắm trên TikTok Shop.</p></div>
         <div class="grid" id="gridTiktok"></div>
       </section>
+      <section id="saved" class="section wrap" hidden>
+        <div class="reveal"><h2>Voucher đã lưu</h2><p class="muted">Danh sách bạn đã lưu, nằm ngay trên máy của bạn.</p></div>
+        <div class="grid" id="gridSaved"></div>
+      </section>
+
+      <section id="faq" class="section wrap">
+        <div class="reveal"><h2>Câu hỏi thường gặp</h2></div>
+        <div class="faq-list">
+          <details class="faq-item"><summary>Bấm vào voucher mà ra trang sản phẩm, vậy là sao?</summary><p>Các mã giá trị cao thường là mã ẩn. Nếu bấm vào mà Shopee hoặc TikTok Shop mở trang sản phẩm thay vì hộp nhận mã, có thể mã đã hết. Bạn hãy thử các voucher khác và quay lại kiểm tra thường xuyên.</p></details>
+          <details class="faq-item"><summary>Vì sao hôm nay mình không nhận được mã?</summary><p>Mỗi ngày chỉ một số tài khoản ngẫu nhiên nhận được mã, và khung giờ cũng khác nhau giữa các tài khoản. Hãy kiên nhẫn thử lại vào các khung giờ thường gặp (0h, 9h, 12h, 15h, 18h, 21h theo giờ Việt Nam) hoặc vào ngày hôm sau.</p></details>
+          <details class="faq-item"><summary>Nhận mã rồi thì dùng thế nào?</summary><p>Sau khi lưu mã vào ví voucher trên ứng dụng, bạn thêm sản phẩm vào giỏ hàng, vào bước thanh toán và chọn voucher đã lưu. Hãy xem kỹ điều kiện như đơn tối thiểu và mức giảm tối đa của từng mã.</p></details>
+          <details class="faq-item"><summary>Web này có phải của Shopee hoặc TikTok Shop không?</summary><p>Không. Đây là trang độc lập, không liên kết với và không được bảo trợ hay xác nhận bởi Shopee hoặc TikTok Shop. Ưu đãi và điều kiện áp dụng do nền tảng quy định và có thể thay đổi.</p></details>
+          <details class="faq-item"><summary>Làm sao để không bỏ lỡ giờ săn mã?</summary><p>Bạn có thể bấm “Thêm nhắc giờ vào lịch” ở phần lưu ý để lịch trên điện thoại hoặc máy tính nhắc trước mỗi khung giờ 5 phút, hoặc cài web này lên màn hình chính để mở nhanh.</p></details>
+        </div>
+      </section>
+
+      <section id="contact" class="section wrap" hidden>
+        <div class="reveal"><h2>Liên hệ</h2><p class="muted">Theo dõi hoặc nhắn tin để cập nhật mã mới và hỏi mình bất cứ điều gì.</p></div>
+        <div class="contact-row" id="contactRow"></div>
+      </section>
     </main>
 
     <footer class="footer">
@@ -112,15 +158,26 @@
         <p class="foot-brand" id="footName">DealNest</p>
         <p class="muted small">
           Trang giới thiệu ưu đãi mua sắm độc lập, không liên kết với, không được bảo trợ hay xác nhận bởi Shopee
-          hoặc TikTok Shop. Một số liên kết có thể là liên kết tiếp thị và website có thể nhận hoa hồng khi bạn mua hàng.
-          Ưu đãi và điều kiện áp dụng do nền tảng quy định và có thể thay đổi.
+          hoặc TikTok Shop. Một số liên kết là liên kết tiếp thị. Ưu đãi và điều kiện áp dụng do nền tảng quy định
+          và có thể thay đổi.
         </p>
+        <p class="muted small" id="analyticsNote" hidden>
+          Trang dùng GoatCounter để đếm lượt xem và lượt bấm một cách ẩn danh, không dùng cookie và không lưu thông tin cá nhân.
+        </p>
+        <p class="muted small" id="iosHint" hidden>Trên iPhone: bấm nút Chia sẻ rồi chọn “Thêm vào Màn hình chính” để cài web.</p>
         <p class="tiny" id="year"></p>
       </div>
     </footer>
 
+    <button type="button" class="mini-clock" id="miniClock" hidden aria-expanded="true" aria-label="Đồng hồ săn sale (bấm để thu nhỏ hoặc mở rộng)">
+      <span class="mc-icon" aria-hidden="true">⏰</span>
+      <span class="mc-text"><b class="mc-time"></b><span class="mc-label"></span></span>
+    </button>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <noscript><p style="text-align:center;padding:2rem">Trang này cần bật JavaScript để hiển thị voucher.</p></noscript>
     <script src="vouchers.js"></script>
+    <script src="vouchers-data.js"></script>
     <script src="script.js"></script>
+    <script src="extras.js"></script>
   </body>
 </html>
