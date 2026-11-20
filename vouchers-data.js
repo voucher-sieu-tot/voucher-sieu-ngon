@@ -12,12 +12,17 @@ const SITE_SETTINGS = {
     "threads": "https://www.threads.com/@voucher.ngon"
   },
   "analytics": {
-    "goatcounter": ""
+    "goatcounter": "ukey"
   },
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T09:50:44.755Z"
+  "updated": "2026-11-20T13:54:02.998Z",
+  "maintenance": {
+    "enabled": false,
+    "message": ""
+  },
+  "news": []
 };
 const VOUCHERS = [
   {
