@@ -17,16 +17,16 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T14:27:35.547Z",
+  "updated": "2026-11-20T17:06:36.760Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
     {
-      "id": "9u0laap6az",
-      "at": "2026-11-20T13:59:13.451Z",
-      "text": "Chuẩn bị đến lượt săn sale/săn mã cuối trong ngày, chúc các bạn may mắn nhaaaaaa"
+      "id": "ny31eme3az",
+      "at": "2026-11-20T17:06:33.659Z",
+      "text": "NEWUSERIZJ4C giảm 100K/0Đ acc mới - siêu hội (đơn đầu nhé)"
     }
   ]
 };
