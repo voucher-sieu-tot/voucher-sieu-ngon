@@ -17,7 +17,7 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T03:58:56.794Z"
+  "updated": "2026-11-20T06:02:03.314Z"
 };
 const VOUCHERS = [
   {
@@ -27,8 +27,9 @@ const VOUCHERS = [
     "minimum": "0đ",
     "maximum": "500k",
     "tag": "ShopeeVIP",
-    "link": "https://shopee.vn/",
-    "featured": true
+    "link": "https://s.shopee.vn/3B97mWAYN9",
+    "featured": true,
+    "used": 100
   },
   {
     "platform": "shopee",
@@ -36,7 +37,8 @@ const VOUCHERS = [
     "discount": "Giảm 500k",
     "minimum": "0đ",
     "link": "https://s.shopee.vn/2LZwixBOBZ",
-    "featured": true
+    "featured": true,
+    "used": 97
   },
   {
     "platform": "shopee",
@@ -69,24 +71,25 @@ const VOUCHERS = [
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
-    "discount": "Giảm 50k",
-    "minimum": "300k",
-    "link": "https://shopee.vn/"
+    "discount": "Giảm 24%",
+    "minimum": "250K",
+    "maximum": "350K",
+    "link": "https://s.shopee.vn/40iEXXqR4B"
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 500k",
-    "minimum": "0đ",
-    "link": "https://www.tiktok.com/",
+    "minimum": "1đ",
+    "link": "https://vt.tiktok.com/ZS9PF3GM21cY3-R3s2m/",
     "featured": true
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 800k",
-    "minimum": "0đ",
-    "link": "https://www.tiktok.com/",
+    "minimum": "1đ",
+    "link": "https://vt.tiktok.com/ZS9PFc327k8HU-ZGf4B/",
     "featured": true
   },
   {
@@ -94,14 +97,14 @@ const VOUCHERS = [
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 300k",
     "minimum": "0đ",
-    "link": "https://www.tiktok.com/"
+    "link": "https://vt.tiktok.com/ZS9PF3Hs8r8nd-HLN02/"
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 200k",
     "minimum": "0đ",
-    "link": "https://www.tiktok.com/"
+    "link": "https://vt.tiktok.com/ZS9PFcGCtaFwj-48gGU/"
   },
   {
     "platform": "tiktok",
@@ -115,13 +118,13 @@ const VOUCHERS = [
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 50k",
     "minimum": "200k",
-    "link": "https://www.tiktok.com/"
+    "link": "https://vt.tiktok.com/ZS9PF3B11WLmQ-reAFg/"
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 30k",
     "minimum": "150k",
-    "link": "https://www.tiktok.com/"
+    "link": "https://vt.tiktok.com/ZS9PF3RWSqWSn-iM4QI/"
   }
 ];
