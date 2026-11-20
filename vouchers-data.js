@@ -17,7 +17,7 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T08:36:57.264Z"
+  "updated": "2026-11-20T09:50:44.755Z"
 };
 const VOUCHERS = [
   {
@@ -45,21 +45,24 @@ const VOUCHERS = [
     "title": "Voucher Shopee",
     "discount": "Giảm 150k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/AKcCRapcDs"
+    "link": "https://s.shopee.vn/AKcCRapcDs",
+    "used": 89
   },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
     "discount": "Giảm 115k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/5fqOBD4siz"
+    "link": "https://s.shopee.vn/5fqOBD4siz",
+    "used": 96
   },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
     "discount": "Giảm 110k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/30pdCkoTpj"
+    "link": "https://s.shopee.vn/30pdCkoTpj",
+    "used": 92
   },
   {
     "platform": "shopee",
@@ -117,7 +120,7 @@ const VOUCHERS = [
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 100k",
     "minimum": "0đ",
-    "link": "https://www.tiktok.com/",
+    "link": "https://vt.tiktok.com/ZS9PYCuRcKkFL-Hxd1P/",
     "used": 100
   },
   {
