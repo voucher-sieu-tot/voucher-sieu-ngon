@@ -142,6 +142,10 @@
       .map(function (x) { return { id: String(x.id || uid()), link: x.link, code: typeof x.code === "string" ? x.code : "", note: typeof x.note === "string" ? x.note : "", used: x.used === true }; });
     s.schedule = (Array.isArray(s.schedule) ? s.schedule : []).filter(function (x) { return x && typeof x.link === "string" && typeof x.voucherId === "string" && !isNaN(Date.parse(x.at)); })
       .map(function (x) { return { id: String(x.id || uid()), voucherId: x.voucherId, at: x.at, link: x.link }; });
+    var mt = s.maintenance && typeof s.maintenance === "object" ? s.maintenance : {};
+    s.maintenance = { enabled: mt.enabled === true, message: typeof mt.message === "string" ? mt.message : "" };
+    s.news = (Array.isArray(s.news) ? s.news : []).filter(function (x) { return x && typeof x.text === "string" && !isNaN(Date.parse(x.at)); })
+      .map(function (x) { return { id: String(x.id || uid()), at: x.at, text: x.text.slice(0, 200) }; }).slice(0, 100);
     s.reportUrl = typeof s.reportUrl === "string" ? s.reportUrl : "";
     s.updated = typeof s.updated === "string" ? s.updated : "";
     return s;
@@ -207,6 +211,7 @@
   function showLockScreen() {
     clearTimeout(state.idleTimer);
     state.token = null;
+    clearStats();
     $("lPass").value = "";
     $("lPin").value = "";
     setMsg($("lockError"), "");
@@ -377,6 +382,7 @@
   function render() {
     renderSettings();
     renderStash();
+    renderNews();
     var ul = $("list");
     ul.textContent = "";
     if (!state.list.length) ul.appendChild(el("li", "muted center pad", "Chưa có voucher nào. Bấm “+ Thêm voucher” để tạo."));
@@ -580,6 +586,154 @@
     if (state.editing >= 0) state.list[state.editing] = next;
     else { next.added = new Date().toISOString(); state.list.unshift(next); }
     dlg.close();
+    render();
+  });
+
+  /* ---------- Thống kê lượt truy cập (GoatCounter) ---------- */
+  function clearStats() { $("gToken").value = ""; $("chart").textContent = ""; $("claims").hidden = true; $("claimsBody").textContent = ""; $("statsSummary").textContent = ""; setMsg($("statsError"), ""); }
+  function drawChart(days) {
+    var NS = "http://www.w3.org/2000/svg", W = 640, H = 240, L = 36, B = 28, T = 12, R = 8;
+    var max = Math.max.apply(null, days.map(function (d) { return d.n; }).concat([1]));
+    var step = max <= 4 ? 1 : Math.ceil(max / 4), top = step * Math.ceil(max / step);
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Biểu đồ lượt truy cập " + days.length + " ngày gần nhất");
+    function add(tag, attrs, text) {
+      var e = document.createElementNS(NS, tag);
+      Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+      if (text != null) e.textContent = text;
+      svg.appendChild(e);
+      return e;
+    }
+    for (var g = 0; g <= top; g += step) {
+      var y = T + (H - T - B) * (1 - g / top);
+      add("line", { x1: L, x2: W - R, y1: y, y2: y, class: "grid" });
+      add("text", { x: L - 6, y: y + 4, class: "ax", "text-anchor": "end" }, String(g));
+    }
+    var bw = (W - L - R) / days.length, every = Math.ceil(days.length / 8);
+    days.forEach(function (d, i) {
+      var h = (H - T - B) * (d.n / top), x = L + i * bw + bw * 0.12;
+      var bar = add("rect", { x: x, y: H - B - h, width: Math.max(1, bw * 0.76), height: h, rx: 2, class: "bar" });
+      var t = document.createElementNS(NS, "title");
+      t.textContent = d.day.slice(8) + "/" + d.day.slice(5, 7) + ": " + d.n + " lượt";
+      bar.appendChild(t);
+      if (i % every === 0 || i === days.length - 1) add("text", { x: x + bw * 0.38, y: H - 8, class: "ax", "text-anchor": "middle" }, d.day.slice(8) + "/" + d.day.slice(5, 7));
+    });
+    $("chart").textContent = "";
+    $("chart").appendChild(svg);
+  }
+  async function loadClaims(code, token, query, visits) {
+    var note = $("claimsNote"), body = $("claimsBody");
+    body.textContent = "";
+    note.textContent = "";
+    try {
+      var res = await fetch("https://" + code + ".goatcounter.com/api/v0/stats/hits" + query + "&limit=100", { headers: { Authorization: "Bearer " + token } });
+      if (!res.ok) throw new Error("x");
+      var json = await res.json();
+      var sums = { "Nổi bật": 0, "Thường": 0, "Chưa phân loại": 0 };
+      (Array.isArray(json.hits) ? json.hits : []).forEach(function (h) {
+        var p = h && typeof h.path === "string" ? h.path : "";
+        if (p.indexOf("click/") !== 0) return;
+        var n = Number(h.count) || 0, label = p.slice(6);
+        if (label.indexOf("Nổi bật | ") === 0) sums["Nổi bật"] += n;
+        else if (label.indexOf("Thường | ") === 0) sums["Thường"] += n;
+        else sums["Chưa phân loại"] += n;
+      });
+      var rows = [["Mã nổi bật", sums["Nổi bật"]], ["Mã thường", sums["Thường"]]];
+      if (sums["Chưa phân loại"] > 0) rows.push(["Chưa phân loại (bấm từ bản web cũ)", sums["Chưa phân loại"]]);
+      rows.forEach(function (r) {
+        var tr = document.createElement("tr");
+        [r[0], String(r[1]), visits > 0 ? (r[1] * 100 / visits).toFixed(1) : "-"].forEach(function (t) {
+          var td = document.createElement("td"); td.textContent = t; tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+      if (json.more) note.textContent = "Có nhiều hơn 100 mục trong GoatCounter nên số có thể thấp hơn thực tế. Xem đầy đủ trên goatcounter.com.";
+      else if (visits === 0) note.textContent = "Chưa có lượt truy cập trong khoảng này nên chưa tính được tỉ lệ.";
+      $("claims").hidden = false;
+    } catch (e) {
+      $("claims").hidden = true;
+      setMsg($("statsError"), "Không lấy được số lượt bấm lấy mã. Bạn vẫn xem được ở mục Events trên https://" + code + ".goatcounter.com");
+    }
+  }
+  $("gGo").addEventListener("click", async function () {
+    var code = state.settings && state.settings.analytics.goatcounter;
+    $("chart").textContent = "";
+    $("claims").hidden = true;
+    $("statsSummary").textContent = "";
+    if (!code || !/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(code)) return setMsg($("statsError"), "Hãy điền mã GoatCounter ở mục Cài đặt web trước (và lưu để web bắt đầu đếm).");
+    var token = $("gToken").value.trim();
+    if (!token) return setMsg($("statsError"), "Hãy dán khóa API của GoatCounter.");
+    setMsg($("statsError"), "");
+    var n = Number($("gRange").value) || 30, end = new Date(), start = new Date(end.getTime() - (n - 1) * 864e5);
+    var url = "https://" + code + ".goatcounter.com/api/v0/stats/total?start=" + start.toISOString().slice(0, 10) + "T00:00:00Z&end=" + end.toISOString().slice(0, 13) + ":00:00Z";
+    $("gGo").disabled = true;
+    $("statsSummary").textContent = "Đang tải…";
+    try {
+      var res = await fetch(url, { headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" } });
+      if (res.status === 401 || res.status === 403) throw new Error("Khóa API không đúng hoặc chưa có quyền đọc thống kê.");
+      if (res.status === 429) throw new Error("GoatCounter đang giới hạn tần suất. Hãy thử lại sau ít phút.");
+      if (!res.ok) throw new Error("GoatCounter trả về lỗi " + res.status + ". Kiểm tra lại mã GoatCounter.");
+      var json = await res.json();
+      var map = {};
+      (Array.isArray(json.stats) ? json.stats : []).forEach(function (s) { if (s && typeof s.day === "string") map[s.day.slice(0, 10)] = Number(s.daily) || 0; });
+      var days = [];
+      for (var i = 0; i < n; i++) {
+        var d = new Date(start.getTime() + i * 864e5).toISOString().slice(0, 10);
+        days.push({ day: d, n: map[d] || 0 });
+      }
+      var total = days.reduce(function (s, d) { return s + d.n; }, 0);
+      var best = days.reduce(function (b, d) { return d.n > b.n ? d : b; }, days[0]);
+      $("statsSummary").textContent = "Tổng " + total + " lượt trong " + n + " ngày, trung bình " + (total / n).toFixed(1) + " lượt mỗi ngày. Ngày cao nhất: " + best.day.slice(8) + "/" + best.day.slice(5, 7) + " (" + best.n + " lượt).";
+      drawChart(days);
+      await loadClaims(code, token, url.slice(url.indexOf("?")), total);
+    } catch (err) {
+      $("statsSummary").textContent = "";
+      var offline = err instanceof TypeError;
+      setMsg($("statsError"), offline
+        ? "Không lấy được số liệu. Có thể mạng lỗi, mã GoatCounter sai, hoặc trình duyệt chặn truy cập trực tiếp. Bạn vẫn xem được biểu đồ đầy đủ tại https://" + code + ".goatcounter.com"
+        : err.message);
+    } finally {
+      $("gGo").disabled = false;
+    }
+  });
+
+  /* ---------- Tin mới ---------- */
+  function renderNews() {
+    $("newsBox").hidden = false;
+    $("statsBox").hidden = false;
+    var ul = $("newsAdminList");
+    ul.textContent = "";
+    var items = state.settings.news.slice().sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
+    if (!items.length) ul.appendChild(el("li", "muted tiny", "Chưa có tin nào."));
+    items.forEach(function (n) {
+      var li = el("li", "stash-item");
+      var top = el("div", "stash-top");
+      top.appendChild(el("b", null, new Date(n.at).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })));
+      top.appendChild(el("span", null, n.text));
+      li.appendChild(top);
+      var acts = el("div", "stash-acts");
+      var del = el("button", "btn btn-danger btn-sm", "Xóa tin");
+      del.type = "button";
+      del.addEventListener("click", function () {
+        if (!confirm("Xóa tin này?")) return;
+        state.settings.news = state.settings.news.filter(function (x) { return x.id !== n.id; });
+        render();
+      });
+      acts.appendChild(del);
+      li.appendChild(acts);
+      ul.appendChild(li);
+    });
+  }
+  $("nAdd").addEventListener("click", function () {
+    if (!state.settings) return;
+    var t = $("nText").value.trim();
+    if (!t) return setMsg($("newsError"), "Hãy nhập nội dung tin.");
+    if (state.settings.news.length >= 100) return setMsg($("newsError"), "Đã đủ 100 tin. Hãy xóa bớt tin cũ.");
+    state.settings.news.unshift({ id: uid(), at: new Date().toISOString(), text: t.slice(0, 200) });
+    $("nText").value = "";
+    setMsg($("newsError"), "");
     render();
   });
 
@@ -798,6 +952,8 @@
     $("stBannerText").value = st.banner.text;
     $("stBannerLink").value = st.banner.link;
     $("stReport").value = st.reportUrl;
+    $("stMaint").checked = st.maintenance.enabled;
+    $("stMaintMsg").value = st.maintenance.message;
     $("stGoat").value = st.analytics.goatcounter;
     $("stTiktok").value = st.contact.tiktok;
     $("stThreads").value = st.contact.threads;
@@ -813,6 +969,8 @@
   bindSetting("stBanner", function (n) { state.settings.banner.enabled = n.checked; });
   bindSetting("stBannerText", function (n) { state.settings.banner.text = n.value; });
   bindSetting("stBannerLink", function (n) { state.settings.banner.link = n.value.trim(); });
+  bindSetting("stMaint", function (n) { state.settings.maintenance.enabled = n.checked; });
+  bindSetting("stMaintMsg", function (n) { state.settings.maintenance.message = n.value; });
   bindSetting("stGoat", function (n) { state.settings.analytics.goatcounter = n.value.trim().toLowerCase(); });
   bindSetting("stTiktok", function (n) { state.settings.contact.tiktok = n.value.trim(); });
   bindSetting("stThreads", function (n) { state.settings.contact.threads = n.value.trim(); });

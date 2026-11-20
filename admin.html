@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: data:; connect-src https://api.github.com https://*.goatcounter.com; base-uri 'none'; form-action 'none'"
     />
     <title>Quản trị — DealNest</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -147,6 +147,13 @@
               <input id="stThreads" type="url" inputmode="url" placeholder="https://www.threads.com/@..." />
             </div>
           </div>
+          <div class="checks">
+            <label><input id="stMaint" type="checkbox" /> Chế độ bảo trì: web công khai chỉ hiện “Đang cập nhật” (admin vẫn dùng bình thường)</label>
+          </div>
+          <div class="field">
+            <label for="stMaintMsg">Lời nhắn khi bảo trì (tùy chọn)</label>
+            <input id="stMaintMsg" type="text" maxlength="300" placeholder="Web đang cập nhật voucher, quay lại sau ít phút nhé." />
+          </div>
           <div class="field">
             <label for="stGoat">Mã GoatCounter để thống kê lượt xem và lượt bấm (tùy chọn, để trống thì tắt)</label>
             <input id="stGoat" type="text" autocapitalize="off" spellcheck="false" placeholder="ví dụ: ten-cua-ban" />
@@ -187,6 +194,46 @@
           <p class="tiny">Đến giờ hẹn, web công khai tự dùng link mới cho voucher đó. Giờ tính theo đồng hồ của người xem.</p>
           <ul id="schedList" class="stash-list"></ul>
           <button id="schedClean" type="button" class="btn btn-ghost btn-sm">Dọn các lịch đã chạy vào danh sách voucher</button>
+        </details>
+
+        <details id="statsBox" class="settings" hidden>
+          <summary>Thống kê lượt truy cập từng ngày (chỉ bạn thấy)</summary>
+          <p class="tiny">
+            Số liệu lấy từ GoatCounter (đã đăng ký và dán mã ở <b>Cài đặt web</b>). Mỗi người truy cập trong một ngày được tính một lượt.
+            Chỉ có số liệu từ lúc web bắt đầu chạy GoatCounter. Để xem, tạo khóa API ở goatcounter.com: Settings, API, chọn quyền đọc thống kê.
+            Khóa này chỉ giữ trong trang khi đang mở, không lưu lại.
+          </p>
+          <div class="grid2">
+            <div class="field">
+              <label for="gToken">Khóa API của GoatCounter</label>
+              <input id="gToken" type="password" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="field">
+              <label for="gRange">Khoảng thời gian</label>
+              <select id="gRange"><option value="7">7 ngày</option><option value="30" selected>30 ngày</option><option value="90">90 ngày</option></select>
+            </div>
+          </div>
+          <button id="gGo" type="button" class="btn btn-ghost btn-sm">Xem thống kê</button>
+          <p id="statsError" class="error" role="alert" hidden></p>
+          <p id="statsSummary" class="muted small" role="status"></p>
+          <div id="chart" class="chart"></div>
+          <div id="claims" class="claims" hidden>
+            <h3 class="claims-h">Lượng mã đã lấy</h3>
+            <p class="tiny">Đếm số lần khách bấm nút <b>Lấy voucher</b> (web không biết khách có dùng mã thành công hay không). Tính trên số lượt truy cập cùng khoảng thời gian. Chỉ tính các lượt bấm từ bản web này trở đi.</p>
+            <table class="claims-t"><thead><tr><th>Loại</th><th>Lượt bấm</th><th>Trên 100 lượt truy cập</th></tr></thead><tbody id="claimsBody"></tbody></table>
+            <p id="claimsNote" class="muted small"></p>
+          </div>
+        </details>
+
+        <details id="newsBox" class="settings" hidden>
+          <summary>Tin mới (thông báo hiện trên web, có lịch sử)</summary>
+          <div class="field">
+            <label for="nText">Nội dung tin (tối đa 200 ký tự)</label>
+            <input id="nText" type="text" maxlength="200" placeholder="Có thêm mã giảm 12.12, vào kiểm tra nhé!" />
+          </div>
+          <button id="nAdd" type="button" class="btn btn-ghost btn-sm">+ Đăng tin</button>
+          <p id="newsError" class="error" role="alert" hidden></p>
+          <ul id="newsAdminList" class="stash-list"></ul>
         </details>
 
         <p id="loading" class="muted center pad">Đang tải danh sách voucher…</p>

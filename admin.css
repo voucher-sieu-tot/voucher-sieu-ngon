@@ -105,3 +105,15 @@ input.invalid { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, .
 .grip { cursor: grab; color: var(--ink-mute); font-size: 1.1rem; line-height: 1; user-select: none; padding: 0 .15rem; }
 .row.dragging { opacity: .45; }
 .row.over { outline: 2px dashed var(--shopee, #ee4d2d); outline-offset: 2px; }
+
+.chart { margin-top: .75rem; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: #e7e5e4; stroke-width: 1; }
+.chart .ax { fill: #78716c; font-size: 11px; }
+.chart .bar { fill: #ee4d2d; }
+
+.claims { margin-top: 1rem; }
+.claims-h { margin: 0 0 .25rem; font-size: 1rem; }
+.claims-t { width: 100%; border-collapse: collapse; margin: .5rem 0; font-size: .9rem; }
+.claims-t th, .claims-t td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid #e7e5e4; }
+.claims-t td:nth-child(2), .claims-t td:nth-child(3), .claims-t th:nth-child(2), .claims-t th:nth-child(3) { text-align: right; }

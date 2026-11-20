@@ -49,6 +49,7 @@
   var GOLDEN_SECONDS = 30 * 60; // "giờ vàng" kéo dài 30 phút kể từ đầu mỗi khung
   var pill = document.getElementById("goldenPill");
   var mini = document.getElementById("miniClock");
+  var night = document.getElementById("nightNote");
   var bar = document.getElementById("slotBar");
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function tick() {
@@ -62,6 +63,7 @@
       else if (s < next) next = s;
     });
     var golden = since >= 0 && since < GOLDEN_SECONDS;
+    if (night) night.hidden = !(sec >= 21 * 3600 + 30 * 60);
     document.documentElement.classList.toggle("golden", golden);
     if (pill) pill.hidden = !golden;
     if (mini) {
@@ -154,6 +156,107 @@
         var label = a.getAttribute("data-track");
         window.goatcounter.count({ path: "click/" + label, title: label, event: true });
       }
+    });
+  }
+
+  /* ---- Tin mới (do bạn viết trong admin) ---- */
+  var news = Array.isArray(settings.news) ? settings.news.filter(function (n) { return n && typeof n.text === "string" && n.text.trim() && !isNaN(Date.parse(n.at)); }) : [];
+  var newsSec = document.getElementById("news");
+  if (newsSec && news.length) {
+    news.sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });
+    var render = function (ul, arr) {
+      arr.forEach(function (n) {
+        var li = document.createElement("li");
+        var t = document.createElement("time");
+        t.dateTime = n.at;
+        t.textContent = new Date(n.at).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        var s = document.createElement("span");
+        s.textContent = n.text.trim().slice(0, 200);
+        li.appendChild(t);
+        li.appendChild(s);
+        ul.appendChild(li);
+      });
+    };
+    render(document.getElementById("newsList"), news.slice(0, 3));
+    if (news.length > 3) {
+      render(document.getElementById("newsOld"), news.slice(3, 53));
+      document.getElementById("newsMore").hidden = false;
+    }
+    newsSec.hidden = false;
+  }
+
+  /* ---- Chế độ bảo trì (bật trong admin) ---- */
+  var mt = settings.maintenance;
+  if (mt && mt.enabled === true) {
+    var box = document.createElement("section");
+    box.className = "maint-box";
+    box.setAttribute("role", "status");
+    var h = document.createElement("h1");
+    h.textContent = "Đang cập nhật";
+    var p = document.createElement("p");
+    p.textContent = typeof mt.message === "string" && mt.message.trim() ? mt.message.trim().slice(0, 300) : "Web đang được cập nhật voucher. Bạn quay lại sau ít phút nhé.";
+    var rb = document.createElement("button");
+    rb.type = "button";
+    rb.className = "ics-btn";
+    rb.textContent = "Thử lại";
+    rb.addEventListener("click", function () { location.reload(); });
+    box.appendChild(h);
+    box.appendChild(p);
+    box.appendChild(rb);
+    document.body.appendChild(box);
+    document.documentElement.classList.add("maint");
+  }
+
+  /* ---- Mã QR của web ---- */
+  var qrBtn = document.getElementById("qrBtn"), qrDlg = document.getElementById("qrDlg");
+  if (qrBtn && qrDlg && window.DealNestQR && typeof qrDlg.showModal === "function") {
+    var qrUrl = function () { return (location.origin + location.pathname).replace(/index\.html$/, "") || location.href; };
+    var qrObj = null;
+    qrBtn.addEventListener("click", function () {
+      var url = location.protocol === "file:" ? location.href : qrUrl();
+      try { qrObj = window.DealNestQR.make(url); } catch (e) { qrObj = null; }
+      var box = document.getElementById("qrBox");
+      box.textContent = "";
+      document.getElementById("qrUrl").textContent = url;
+      if (!qrObj) { box.textContent = "Địa chỉ quá dài để tạo mã QR."; qrDlg.showModal(); return; }
+      var n = qrObj.size, q = 4, NS = "http://www.w3.org/2000/svg";
+      var svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 " + (n + 2 * q) + " " + (n + 2 * q));
+      svg.setAttribute("role", "img");
+      svg.setAttribute("aria-label", "Mã QR dẫn tới " + url);
+      svg.setAttribute("shape-rendering", "crispEdges");
+      var bg = document.createElementNS(NS, "rect");
+      bg.setAttribute("width", n + 2 * q); bg.setAttribute("height", n + 2 * q); bg.setAttribute("fill", "#fff");
+      svg.appendChild(bg);
+      var d = "";
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (qrObj.get(x, y)) d += "M" + (x + q) + " " + (y + q) + "h1v1h-1z";
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d); path.setAttribute("fill", "#000");
+      svg.appendChild(path);
+      box.appendChild(svg);
+      qrDlg.showModal();
+    });
+    document.getElementById("qrClose").addEventListener("click", function () { qrDlg.close(); });
+    document.getElementById("qrCopy").addEventListener("click", function () {
+      var u = document.getElementById("qrUrl").textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).catch(function () {});
+    });
+    document.getElementById("qrDl").addEventListener("click", function () {
+      if (!qrObj) return;
+      var n = qrObj.size, q = 4, S = Math.max(8, Math.floor(1024 / (n + 2 * q)));
+      var cv = document.createElement("canvas");
+      cv.width = cv.height = (n + 2 * q) * S;
+      var ctx = cv.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = "#000";
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (qrObj.get(x, y)) ctx.fillRect((x + q) * S, (y + q) * S, S, S);
+      cv.toBlob(function (blob) {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "qr-web.png";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      }, "image/png");
     });
   }
 

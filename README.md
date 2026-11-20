@@ -126,3 +126,34 @@ Lưu ý: kho lưu và lịch nằm trong `vouchers-data.js`, là file công khai
 ### Admin: nhân bản và kéo thả
 
 Mỗi voucher có nút **Nhân bản** (tạo bản sao ngay bên dưới) và biểu tượng ⠿ để kéo thả đổi thứ tự trên máy tính. Trên điện thoại hãy dùng nút ↑ ↓.
+
+### Sắp xếp, lọc nhanh, kiểu danh sách, "Đã thử"
+
+- **Sắp xếp**: Mặc định / Mới thêm / Giảm nhiều nhất / Đơn tối thiểu thấp nhất. Với voucher giảm theo phần trăm, "giảm nhiều nhất" lấy theo mức giảm tối đa nếu có.
+- **Chip lọc nhanh** tự tạo từ dữ liệu: "Đơn 0đ" và mỗi nhãn (tag) như "ShopeeVIP".
+- **Thanh đếm voucher** ở đầu danh sách, tính thật từ dữ liệu (không tính voucher đã hết hạn).
+- **Thẻ / Danh sách**: nút chuyển kiểu hiển thị, được nhớ trên máy người xem. Mục Nổi bật luôn là dải thẻ.
+- **Đã thử**: bấm "Lấy voucher" thì thẻ tự mờ đi; sau 1 giờ tự trở lại bình thường. Người xem cũng có nút "Đánh dấu đã thử" để bật hoặc bỏ thủ công. Lưu ngay trên máy họ.
+- **Nhắc cuối ngày**: sau 21h30 (giờ Việt Nam) hiện dòng "Hẹn bạn lúc 0h hoặc 9h sáng mai".
+
+### Tin mới và chế độ bảo trì (trong admin)
+
+- **Tin mới**: viết thông báo ngắn trong admin; web hiện 3 tin mới nhất, các tin cũ gập trong "Xem tin cũ hơn".
+- **Chế độ bảo trì**: tích bật trong **Cài đặt web** thì web công khai chỉ hiện "Đang cập nhật" cùng lời nhắn bạn viết. Trang admin vẫn dùng bình thường. Nhớ tắt đi và bấm Lưu khi xong.
+
+## Mã QR của web
+Cuối trang có nút **Mã QR**. Bấm vào sẽ hiện mã QR trỏ tới địa chỉ web hiện tại, có thể tải ảnh PNG hoặc sao chép link để in/đăng. Mã QR được tạo ngay trên trình duyệt (file `qr.js`), không gọi dịch vụ ngoài.
+
+## "Có gì mới kể từ lần trước"
+Khi khách quay lại, web so với lần ghé trước và hiện dòng "có N voucher mới, M tin mới". Bấm "Xem voucher mới" để sắp theo mới thêm. Khách mới lần đầu thì không hiện. Voucher chỉ được tính là mới nếu có trường `added` (admin tự gán khi bạn thêm, thêm hàng loạt hoặc nhân bản).
+
+## Thống kê lượt truy cập trong admin (chỉ admin thấy)
+1. Đăng ký miễn phí tại goatcounter.com, lấy mã site (phần trước `.goatcounter.com`).
+2. Admin → Cài đặt web → dán mã GoatCounter → Lưu.
+3. Trên GoatCounter: Settings → API → tạo khóa có quyền đọc thống kê.
+4. Admin → Thống kê → dán khóa API → chọn 7/30/90 ngày → Xem. Biểu đồ cột hiện lượt truy cập mỗi ngày.
+
+Lưu ý: chỉ đếm từ lúc GoatCounter bắt đầu chạy; khóa API chỉ giữ trong bộ nhớ và bị xóa khi admin khóa lại; nếu trình duyệt chặn gọi API, admin báo lỗi kèm link xem thẳng trên goatcounter.com.
+
+## Lượng mã đã lấy (trong admin, mục Thống kê)
+Sau khi bấm "Xem thống kê", bên dưới biểu đồ có bảng **Mã nổi bật / Mã thường**: số lần khách bấm nút "Lấy voucher" và số lần bấm trên mỗi 100 lượt truy cập cùng khoảng thời gian. Đây là số thật lấy từ GoatCounter, không phải số giả. Web không biết khách có dùng mã thành công hay không, nên đây là lượt bấm. Các lượt bấm từ bản web cũ (chưa phân loại nổi bật/thường) được gom riêng một dòng.

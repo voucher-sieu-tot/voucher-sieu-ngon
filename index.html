@@ -90,6 +90,7 @@
           </div>
         </div>
         <p class="slot-bar" id="slotBar" hidden></p>
+        <p class="night-note" id="nightNote" hidden>Khung giờ cuối trong ngày (21h) đã qua. Hẹn bạn lúc 0h hoặc 9h sáng mai nhé.</p>
         <button type="button" class="ics-btn" id="icsBtn">📅 Thêm nhắc giờ vào lịch</button>
         <details class="tips-more">
           <summary>Xem lưu ý khi săn mã</summary>
@@ -116,6 +117,36 @@
       </aside>
 
       <p id="empty" class="empty wrap" hidden></p>
+
+      <section id="news" class="section wrap news" hidden>
+        <div class="reveal"><h2>Tin mới</h2></div>
+        <ul class="news-list" id="newsList"></ul>
+        <details class="news-more" id="newsMore" hidden><summary>Xem tin cũ hơn</summary><ul class="news-list" id="newsOld"></ul></details>
+      </section>
+
+      <div class="wrap viewbar" id="viewBar">
+        <p class="since-box" id="sinceBox" hidden>
+          <span id="sinceText"></span>
+          <button type="button" class="chip" id="sinceGo">Xem voucher mới</button>
+          <button type="button" class="since-x" id="sinceX" aria-label="Ẩn thông báo">×</button>
+        </p>
+        <p class="count-bar" id="countBar" aria-live="polite"></p>
+        <div class="viewbar-row">
+          <label class="sort"><span>Sắp xếp</span>
+            <select id="sortSel">
+              <option value="default">Mặc định</option>
+              <option value="new">Mới thêm</option>
+              <option value="discount">Giảm nhiều nhất</option>
+              <option value="minimum">Đơn tối thiểu thấp nhất</option>
+            </select>
+          </label>
+          <div class="view-toggle" role="group" aria-label="Kiểu hiển thị">
+            <button type="button" id="viewCards" class="vt on" aria-pressed="true">Thẻ</button>
+            <button type="button" id="viewList" class="vt" aria-pressed="false">Danh sách</button>
+          </div>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Lọc nhanh"></div>
+      </div>
 
       <section id="featured" class="section wrap" hidden>
         <div class="reveal"><h2>Voucher nổi bật</h2><p class="muted">Những ưu đãi được chọn lọc, đáng để bạn xem qua.</p></div>
@@ -157,14 +188,16 @@
       <div class="wrap">
         <p class="foot-brand" id="footName">DealNest</p>
         <p class="muted small">
-          Trang giới thiệu ưu đãi mua sắm độc lập, không liên kết với, không được bảo trợ hay xác nhận bởi Shopee
-          hoặc TikTok Shop. Một số liên kết là liên kết tiếp thị. Ưu đãi và điều kiện áp dụng do nền tảng quy định
-          và có thể thay đổi.
+          <b>Miễn trừ trách nhiệm:</b> đây là trang giới thiệu ưu đãi mua sắm độc lập, không phải trang chính thức và
+          không liên kết với, không được bảo trợ hay xác nhận bởi Shopee hoặc TikTok Shop. Một số liên kết là liên kết
+          tiếp thị. Mức giảm, điều kiện và thời gian áp dụng do nền tảng quy định, có thể thay đổi hoặc hết bất cứ lúc
+          nào. Vui lòng kiểm tra lại trên ứng dụng trước khi mua.
         </p>
         <p class="muted small" id="analyticsNote" hidden>
           Trang dùng GoatCounter để đếm lượt xem và lượt bấm một cách ẩn danh, không dùng cookie và không lưu thông tin cá nhân.
         </p>
         <p class="muted small" id="iosHint" hidden>Trên iPhone: bấm nút Chia sẻ rồi chọn “Thêm vào Màn hình chính” để cài web.</p>
+        <p><button type="button" class="ics-btn" id="qrBtn">📱 Mã QR của web</button></p>
         <p class="tiny" id="year"></p>
       </div>
     </footer>
@@ -173,11 +206,22 @@
       <span class="mc-icon" aria-hidden="true">⏰</span>
       <span class="mc-text"><b class="mc-time"></b><span class="mc-label"></span></span>
     </button>
+    <dialog id="qrDlg" class="qr-dlg" aria-labelledby="qrTitle">
+      <h2 id="qrTitle">Quét để mở web</h2>
+      <div id="qrBox" class="qr-box"></div>
+      <p class="muted small" id="qrUrl"></p>
+      <div class="qr-actions">
+        <button type="button" class="ics-btn" id="qrDl">Tải ảnh PNG</button>
+        <button type="button" class="ics-btn" id="qrCopy">Sao chép link</button>
+        <button type="button" class="ics-btn" id="qrClose">Đóng</button>
+      </div>
+    </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <noscript><p style="text-align:center;padding:2rem">Trang này cần bật JavaScript để hiển thị voucher.</p></noscript>
     <script src="vouchers.js"></script>
     <script src="vouchers-data.js"></script>
     <script src="script.js"></script>
+    <script src="qr.js"></script>
     <script src="extras.js"></script>
   </body>
 </html>

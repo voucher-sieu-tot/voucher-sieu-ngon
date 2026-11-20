@@ -187,3 +187,62 @@
 .faq-item[open] summary::after { content: "−"; }
 .faq-item p { margin: .7rem 0 .1rem; color: var(--ink-soft); font-size: .92rem; line-height: 1.6; }
 [data-theme="dark"] .faq-item { background: #211b17; border-color: #34291f; }
+
+/* ---------- Thanh sắp xếp, chip lọc, đếm voucher, kiểu danh sách ---------- */
+.viewbar { margin-top: 1.5rem; display: grid; gap: .75rem; }
+.count-bar { margin: 0; font-size: .85rem; color: var(--ink-soft); font-weight: 600; text-align: center; }
+.viewbar-row { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; }
+.sort { display: inline-flex; align-items: center; gap: .5rem; font-size: .82rem; color: var(--ink-soft); }
+.sort select { font: inherit; font-size: .85rem; padding: .4rem .7rem; border-radius: .8rem; border: 1px solid rgba(0,0,0,.12); background: #fff; color: var(--ink); }
+.view-toggle { display: inline-flex; border: 1px solid rgba(0,0,0,.12); border-radius: 999px; overflow: hidden; background: #fff; }
+.vt { border: 0; background: transparent; font: inherit; font-size: .82rem; font-weight: 600; padding: .4rem .95rem; cursor: pointer; color: var(--ink-soft); }
+.vt.on { background: var(--shopee); color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chips[hidden] { display: none; }
+.chip { border: 1px solid rgba(238,77,45,.3); background: transparent; color: var(--ink-soft); font: inherit; font-size: .8rem; font-weight: 600; padding: .3rem .8rem; border-radius: 999px; cursor: pointer; }
+.chip.on { background: rgba(238,77,45,.12); color: var(--shopee); border-color: var(--shopee); }
+
+.compact .grid:not(#gridFeatured) { grid-template-columns: 1fr; gap: .75rem; }
+.compact .grid:not(#gridFeatured) .card { display: grid; grid-template-columns: 8.2rem 1fr; }
+.compact .grid:not(#gridFeatured) .stub { min-height: 0; padding: .8rem .9rem; justify-content: center; }
+.compact .grid:not(#gridFeatured) .stub .top { margin-bottom: .2rem; }
+.compact .grid:not(#gridFeatured) .stub .tags, .compact .grid:not(#gridFeatured) .stub-img, .compact .grid:not(#gridFeatured) .perf { display: none; }
+.compact .grid:not(#gridFeatured) .stub .discount { font-size: 1.45rem; }
+.compact .grid:not(#gridFeatured) .stub .min { font-size: .72rem; }
+.compact .grid:not(#gridFeatured) .body { padding: .8rem 1rem; gap: .6rem; }
+.compact .grid:not(#gridFeatured) .card.hot .stub { border-radius: 0; }
+
+.card.tried { opacity: .5; filter: saturate(.55); transition: opacity .2s; }
+.card.tried:hover, .card.tried:focus-within { opacity: .9; }
+.tool.tried-btn[aria-pressed="true"] { color: var(--ink-mute); }
+
+/* ---------- Tin mới, nhắc cuối ngày, bảo trì ---------- */
+.news-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; }
+.news-list li { display: flex; gap: .8rem; align-items: baseline; padding: .65rem .95rem; border-radius: .9rem; background: rgba(255,255,255,.7); border: 1px solid rgba(0,0,0,.07); font-size: .92rem; }
+.news-list time { flex: none; font-size: .75rem; font-weight: 700; color: var(--shopee); font-variant-numeric: tabular-nums; }
+.news-more { margin-top: .75rem; }
+.news-more summary { cursor: pointer; font-size: .85rem; font-weight: 650; color: var(--ink-soft); }
+.night-note { margin: .75rem 0 0; font-size: .85rem; color: #7c2d12; }
+.maint .nav-wrap, .maint main, .maint .footer, .maint .mini-clock, .maint .toast { display: none !important; }
+.maint-box { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: .8rem; padding: 2rem 1.25rem; text-align: center; }
+.maint-box h1 { font-family: var(--serif); margin: 0; }
+.maint-box p { margin: 0; max-width: 28rem; color: var(--ink-soft); }
+[data-theme="dark"] .sort select, [data-theme="dark"] .view-toggle { background: #211b17; border-color: #34291f; color: var(--ink); }
+[data-theme="dark"] .vt { color: var(--ink-soft); }
+[data-theme="dark"] .vt.on { color: #fff; }
+[data-theme="dark"] .chip { color: var(--ink-soft); border-color: rgba(255,150,100,.35); }
+[data-theme="dark"] .chip.on { color: #ff9a6e; border-color: #ff9a6e; background: rgba(255,150,100,.12); }
+[data-theme="dark"] .news-list li { background: rgba(255,255,255,.05); border-color: #34291f; }
+[data-theme="dark"] .night-note { color: #f1d9cb; }
+
+/* ---------- Mã QR, thông báo "có gì mới" ---------- */
+.qr-dlg { border: 0; border-radius: 1.25rem; padding: 1.5rem; max-width: min(92vw, 24rem); background: var(--cream); color: var(--ink); box-shadow: var(--shadow-lift); text-align: center; }
+.qr-dlg::backdrop { background: rgba(0,0,0,.5); }
+.qr-dlg h2 { margin: 0 0 .75rem; font-family: var(--serif); }
+.qr-box { background: #fff; border-radius: .9rem; padding: .5rem; }
+.qr-box svg { width: 100%; height: auto; display: block; }
+.qr-actions { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: .75rem; }
+.since-box { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 0; padding: .6rem .9rem; border-radius: .9rem; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.35); font-size: .88rem; }
+.since-box[hidden] { display: none; }
+.since-x { margin-left: auto; border: 0; background: transparent; font-size: 1.2rem; line-height: 1; cursor: pointer; color: var(--ink-mute); }
+[data-theme="dark"] .qr-dlg { background: #211b17; }

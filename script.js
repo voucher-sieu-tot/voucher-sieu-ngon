@@ -213,7 +213,8 @@
       a.href = url; // exactly the link you wrote
       a.target = "_blank";
       a.rel = "sponsored noopener noreferrer";
-      a.setAttribute("data-track", (NAMES[v.platform] || v.platform) + " | " + v.discount + (v.minimum ? " | đơn từ " + v.minimum : "") + " | " + url.replace(/^https?:\/\//, "").slice(-24));
+      a.addEventListener("click", function () { setTried(v, true); if (card._paintTried) card._paintTried(); });
+      a.setAttribute("data-track", (v.featured ? "Nổi bật" : "Thường") + " | " + (NAMES[v.platform] || v.platform) + " | " + v.discount + (v.minimum ? " | đơn từ " + v.minimum : "") + " | " + url.replace(/^https?:\/\//, "").slice(-24));
       a.appendChild(document.createTextNode("Lấy voucher"));
       a.appendChild(svg(ICON.out, 14));
       foot.appendChild(a);
@@ -247,6 +248,18 @@
         if (activeTab === "saved") render(searchInput.value); else paintFav();
       });
       tools.appendChild(favBtn);
+      var triedBtn = el("button", "tool tried-btn");
+      triedBtn.type = "button";
+      var paintTried = function () {
+        var on = isTried(v);
+        triedBtn.textContent = on ? "✓ Đã thử (bỏ)" : "Đánh dấu đã thử";
+        triedBtn.setAttribute("aria-pressed", String(on));
+        card.classList.toggle("tried", on);
+      };
+      card._paintTried = paintTried;
+      paintTried();
+      triedBtn.addEventListener("click", function () { setTried(v, !isTried(v)); paintTried(); });
+      tools.appendChild(triedBtn);
       if (url && !expired) {
         var copyBtn = el("button", "tool", "Sao chép link");
         copyBtn.type = "button";
@@ -340,6 +353,72 @@
   var clearBtn = document.getElementById("clear");
 
   var activeTab = "all";
+  var sortMode = "default";
+  var activeChip = null;
+
+  /* ---------- Đã thử: tự mờ đi, sau 1 giờ tự trở lại bình thường ---------- */
+  var TRIED_KEY = "dealnest_tried";
+  var TRIED_MS = 60 * 60 * 1000;
+  var tried = {};
+  try {
+    var rawT = JSON.parse(localStorage.getItem(TRIED_KEY) || "{}");
+    if (rawT && typeof rawT === "object" && !Array.isArray(rawT)) tried = rawT;
+  } catch (e) {}
+  function purgeTried() {
+    var now = Date.now(), changed = false;
+    Object.keys(tried).forEach(function (k) {
+      if (typeof tried[k] !== "number" || now - tried[k] >= TRIED_MS) { delete tried[k]; changed = true; }
+    });
+    if (changed) { try { localStorage.setItem(TRIED_KEY, JSON.stringify(tried)); } catch (e) {} }
+  }
+  function isTried(v) { var t = tried[favKey(v)]; return typeof t === "number" && Date.now() - t < TRIED_MS; }
+  function setTried(v, on) {
+    if (on) tried[favKey(v)] = Date.now(); else delete tried[favKey(v)];
+    try { localStorage.setItem(TRIED_KEY, JSON.stringify(tried)); } catch (e) {}
+  }
+  purgeTried();
+  setInterval(function () {
+    purgeTried();
+    document.querySelectorAll(".card").forEach(function (c) { if (c._paintTried) c._paintTried(); });
+  }, 30000);
+
+  /* ---------- Chuyển đổi số liệu để sắp xếp / lọc ---------- */
+  function money(str) {
+    if (typeof str !== "string") return null;
+    var m = str.replace(/\./g, "").replace(",", ".").match(/(\d+(?:\.\d+)?)\s*(k|tr|m|triệu|nghìn|ngàn|đ|d)?/i);
+    if (!m) return null;
+    var n = parseFloat(m[1]), u = (m[2] || "").toLowerCase();
+    if (u === "k" || u === "nghìn" || u === "ngàn") return n * 1e3;
+    if (u === "tr" || u === "m" || u === "triệu") return n * 1e6;
+    return n;
+  }
+  function discountValue(v) {
+    var d = String(v.discount || "");
+    if (d.indexOf("%") !== -1) {
+      var cap = money(v.maximum);
+      return cap != null ? cap : (parseFloat(d.replace(/[^\d.,]/g, "").replace(",", ".")) || 0) * 1000;
+    }
+    var n = money(d);
+    return n == null ? 0 : n;
+  }
+  function minimumValue(v) { var n = money(v.minimum); return n == null ? 0 : n; }
+  function isExpiredV(v) { var d = parseExpiry(v.expires); return d ? d.getTime() < Date.now() : false; }
+  function sorted(items) {
+    var a = items.map(function (v, i) { return { v: v, i: i }; });
+    var cmp = {
+      "new": function (x, y) { return (Date.parse(y.v.added) || 0) - (Date.parse(x.v.added) || 0); },
+      "discount": function (x, y) { return discountValue(y.v) - discountValue(x.v); },
+      "minimum": function (x, y) { return minimumValue(x.v) - minimumValue(y.v); }
+    }[sortMode];
+    if (cmp) a.sort(function (x, y) { return cmp(x, y) || x.i - y.i; });
+    return a.map(function (o) { return o.v; });
+  }
+  function chipMatch(v) {
+    if (!activeChip) return true;
+    if (activeChip === "zero") return minimumValue(v) === 0 && v.minimum != null && String(v.minimum).trim() !== "";
+    if (activeChip.indexOf("tag:") === 0) return v.tag === activeChip.slice(4);
+    return true;
+  }
   var tabsEl = document.getElementById("tabs");
 
   var list = [];
@@ -385,6 +464,9 @@
         })
       : list;
 
+    items = sorted(items.filter(chipMatch));
+    updateCountBar(items.length);
+
     var featured = items.filter(function (v) { return v.featured; });
     var shopee = items.filter(function (v) { return v.platform === "shopee"; });
     var tiktok = items.filter(function (v) { return v.platform === "tiktok"; });
@@ -422,6 +504,91 @@
       emptyBox.hidden = true;
     }
   }
+
+  function updateCountBar(shown) {
+    var bar = document.getElementById("countBar");
+    if (!bar) return;
+    var live = list.filter(function (v) { return !isExpiredV(v); });
+    var sp = live.filter(function (v) { return v.platform === "shopee"; }).length;
+    var tt = live.length - sp;
+    var txt = live.length + " voucher đang có (Shopee " + sp + " · TikTok Shop " + tt + ")";
+    if (shown !== list.length) txt += " — đang hiển thị " + shown;
+    bar.textContent = list.length ? txt : "";
+  }
+
+  function buildChips() {
+    var box = document.getElementById("chips");
+    if (!box) return;
+    box.textContent = "";
+    var defs = [];
+    if (list.some(function (v) { return v.minimum != null && minimumValue(v) === 0 && String(v.minimum).trim() !== ""; })) defs.push(["zero", "Đơn 0đ"]);
+    var seen = {};
+    list.forEach(function (v) { if (v.tag && !seen[v.tag]) { seen[v.tag] = true; defs.push(["tag:" + v.tag, String(v.tag)]); } });
+    box.hidden = defs.length === 0;
+    defs.forEach(function (d) {
+      var b = el("button", "chip" + (activeChip === d[0] ? " on" : ""), d[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(activeChip === d[0]));
+      b.addEventListener("click", function () {
+        activeChip = activeChip === d[0] ? null : d[0];
+        buildChips();
+        render(searchInput.value);
+      });
+      box.appendChild(b);
+    });
+  }
+  buildChips();
+
+  /* ---------- "Có gì mới kể từ lần ghé trước" ---------- */
+  (function sinceLastVisit() {
+    var prev = null;
+    try {
+      var ss = sessionStorage.getItem("dn_prev");
+      if (ss !== null) {
+        prev = ss === "none" ? null : Number(ss);
+      } else {
+        var ls = localStorage.getItem("dealnest_lastvisit");
+        prev = ls ? Number(ls) : null;
+        sessionStorage.setItem("dn_prev", prev == null ? "none" : String(prev));
+        localStorage.setItem("dealnest_lastvisit", String(Date.now()));
+      }
+    } catch (e) {}
+    if (!prev || isNaN(prev)) return;
+    var nv = list.filter(function (v) { var t = Date.parse(v.added); return !isNaN(t) && t > prev && !isExpiredV(v); }).length;
+    var nn = Array.isArray(settings.news) ? settings.news.filter(function (n) { var t = n && Date.parse(n.at); return t && t > prev; }).length : 0;
+    if (!nv && !nn) return;
+    var parts = [];
+    if (nv) parts.push(nv + " voucher mới");
+    if (nn) parts.push(nn + " tin mới");
+    var when = new Date(prev).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    document.getElementById("sinceText").textContent = "✨ Kể từ lần ghé trước (" + when + ") có " + parts.join(" và ") + ".";
+    var go = document.getElementById("sinceGo");
+    go.hidden = !nv;
+    go.addEventListener("click", function () {
+      sortMode = "new";
+      var sel = document.getElementById("sortSel");
+      if (sel) sel.value = "new";
+      render(searchInput.value);
+    });
+    document.getElementById("sinceX").addEventListener("click", function () { document.getElementById("sinceBox").hidden = true; });
+    document.getElementById("sinceBox").hidden = false;
+  })();
+
+  var sortSel = document.getElementById("sortSel");
+  if (sortSel) sortSel.addEventListener("change", function () { sortMode = sortSel.value; render(searchInput.value); });
+
+  var VIEW_KEY = "dealnest_view";
+  function setView(mode) {
+    document.documentElement.classList.toggle("compact", mode === "list");
+    var c = document.getElementById("viewCards"), l = document.getElementById("viewList");
+    if (c) { c.classList.toggle("on", mode !== "list"); c.setAttribute("aria-pressed", String(mode !== "list")); }
+    if (l) { l.classList.toggle("on", mode === "list"); l.setAttribute("aria-pressed", String(mode === "list")); }
+    try { localStorage.setItem(VIEW_KEY, mode); } catch (e) {}
+  }
+  var vc = document.getElementById("viewCards"), vl = document.getElementById("viewList");
+  if (vc) vc.addEventListener("click", function () { setView("cards"); });
+  if (vl) vl.addEventListener("click", function () { setView("list"); });
+  try { if (localStorage.getItem(VIEW_KEY) === "list") setView("list"); } catch (e) {}
 
   function setTab(name) {
     activeTab = name;
