@@ -17,9 +17,18 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T06:02:03.314Z"
+  "updated": "2026-11-20T08:36:57.264Z"
 };
 const VOUCHERS = [
+  {
+    "platform": "shopee",
+    "title": "Voucher Shopee",
+    "discount": "Giảm 500k",
+    "minimum": "0đ",
+    "link": "https://s.shopee.vn/2LZwixBOBZ",
+    "featured": true,
+    "used": 97
+  },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
@@ -34,25 +43,9 @@ const VOUCHERS = [
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
-    "discount": "Giảm 500k",
+    "discount": "Giảm 150k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/2LZwixBOBZ",
-    "featured": true,
-    "used": 97
-  },
-  {
-    "platform": "shopee",
-    "title": "Voucher Shopee",
-    "discount": "Giảm 100k",
-    "minimum": "0đ",
-    "link": "https://s.shopee.vn/2gCn7r1t23"
-  },
-  {
-    "platform": "shopee",
-    "title": "Voucher Shopee",
-    "discount": "Giảm 110k",
-    "minimum": "0đ",
-    "link": "https://s.shopee.vn/30pdCkoTpj"
+    "link": "https://s.shopee.vn/AKcCRapcDs"
   },
   {
     "platform": "shopee",
@@ -64,9 +57,17 @@ const VOUCHERS = [
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
-    "discount": "Giảm 150k",
+    "discount": "Giảm 110k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/AKcCRapcDs"
+    "link": "https://s.shopee.vn/30pdCkoTpj"
+  },
+  {
+    "platform": "shopee",
+    "title": "Voucher Shopee",
+    "discount": "Giảm 100k",
+    "minimum": "0đ",
+    "link": "https://s.shopee.vn/2gCn7r1t23",
+    "used": 79
   },
   {
     "platform": "shopee",
@@ -74,7 +75,8 @@ const VOUCHERS = [
     "discount": "Giảm 24%",
     "minimum": "250K",
     "maximum": "350K",
-    "link": "https://s.shopee.vn/40iEXXqR4B"
+    "link": "https://s.shopee.vn/40iEXXqR4B",
+    "used": 86
   },
   {
     "platform": "tiktok",
@@ -82,7 +84,8 @@ const VOUCHERS = [
     "discount": "Giảm 500k",
     "minimum": "1đ",
     "link": "https://vt.tiktok.com/ZS9PF3GM21cY3-R3s2m/",
-    "featured": true
+    "featured": true,
+    "used": 99
   },
   {
     "platform": "tiktok",
@@ -90,41 +93,47 @@ const VOUCHERS = [
     "discount": "Giảm 800k",
     "minimum": "1đ",
     "link": "https://vt.tiktok.com/ZS9PFc327k8HU-ZGf4B/",
-    "featured": true
+    "featured": true,
+    "used": 100
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 300k",
     "minimum": "0đ",
-    "link": "https://vt.tiktok.com/ZS9PF3Hs8r8nd-HLN02/"
+    "link": "https://vt.tiktok.com/ZS9PF3Hs8r8nd-HLN02/",
+    "used": 85
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 200k",
     "minimum": "0đ",
-    "link": "https://vt.tiktok.com/ZS9PFcGCtaFwj-48gGU/"
+    "link": "https://vt.tiktok.com/ZS9PFcGCtaFwj-48gGU/",
+    "used": 98
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 100k",
     "minimum": "0đ",
-    "link": "https://www.tiktok.com/"
+    "link": "https://www.tiktok.com/",
+    "used": 100
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 50k",
     "minimum": "200k",
-    "link": "https://vt.tiktok.com/ZS9PF3B11WLmQ-reAFg/"
+    "link": "https://vt.tiktok.com/ZS9PF3B11WLmQ-reAFg/",
+    "used": 32
   },
   {
     "platform": "tiktok",
     "title": "Voucher TikTok Shop",
     "discount": "Giảm 30k",
     "minimum": "150k",
-    "link": "https://vt.tiktok.com/ZS9PF3RWSqWSn-iM4QI/"
+    "link": "https://vt.tiktok.com/ZS9PF3RWSqWSn-iM4QI/",
+    "used": 85
   }
 ];
