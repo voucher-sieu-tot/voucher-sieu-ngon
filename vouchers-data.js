@@ -17,17 +17,9 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-19T09:06:30.000Z"
+  "updated": "2026-11-20T03:58:56.794Z"
 };
 const VOUCHERS = [
-  {
-    "platform": "shopee",
-    "title": "Voucher Shopee",
-    "discount": "Giảm 500k",
-    "minimum": "0đ",
-    "link": "https://s.shopee.vn/2LZwixBOBZ",
-    "featured": true
-  },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
@@ -41,34 +33,38 @@ const VOUCHERS = [
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
+    "discount": "Giảm 500k",
+    "minimum": "0đ",
+    "link": "https://s.shopee.vn/2LZwixBOBZ",
+    "featured": true
+  },
+  {
+    "platform": "shopee",
+    "title": "Voucher Shopee",
     "discount": "Giảm 100k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/2gCn7r1t23",
-    "featured": true
+    "link": "https://s.shopee.vn/2gCn7r1t23"
   },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
     "discount": "Giảm 110k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/30pdCkoTpj",
-    "featured": true
+    "link": "https://s.shopee.vn/30pdCkoTpj"
   },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
     "discount": "Giảm 115k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/5fqOBD4siz",
-    "featured": true
+    "link": "https://s.shopee.vn/5fqOBD4siz"
   },
   {
     "platform": "shopee",
     "title": "Voucher Shopee",
     "discount": "Giảm 150k",
     "minimum": "0đ",
-    "link": "https://s.shopee.vn/AKcCRapcDs",
-    "featured": true
+    "link": "https://s.shopee.vn/AKcCRapcDs"
   },
   {
     "platform": "shopee",
