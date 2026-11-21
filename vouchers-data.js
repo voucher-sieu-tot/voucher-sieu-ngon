@@ -17,9 +17,9 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-21T00:49:43.036Z",
+  "updated": "2026-11-21T00:51:37.699Z",
   "maintenance": {
-    "enabled": true,
+    "enabled": false,
     "message": ""
   },
   "news": [
