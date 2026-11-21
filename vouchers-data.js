@@ -17,21 +17,21 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-21T00:51:37.699Z",
+  "updated": "2026-11-21T15:54:52.226Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
     {
+      "id": "4d6mg59oju",
+      "at": "2026-11-21T15:54:49.098Z",
+      "text": "Hôm nay đã có 14 bạn nhận được mã 500k/0đ, chúc mừng các bạn nheeeeee. Mong là các bạn khác cũng sẽ sớm lấy được voucher ưng ý"
+    },
+    {
       "id": "ze5pj4w3pw",
       "at": "2026-11-21T00:48:27.860Z",
       "text": "Chúc mọi người buổi sáng tốt lành, một ngáy săn mã thuận lợi !!!!"
-    },
-    {
-      "id": "ny31eme3az",
-      "at": "2026-11-20T17:06:33.659Z",
-      "text": "NEWUSERIZJ4C giảm 100K/0Đ acc mới - siêu hội (đơn đầu nhé)"
     }
   ]
 };
