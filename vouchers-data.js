@@ -17,12 +17,17 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-20T17:06:36.760Z",
+  "updated": "2026-11-21T00:48:47.596Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
+    {
+      "id": "ze5pj4w3pw",
+      "at": "2026-11-21T00:48:27.860Z",
+      "text": "Chúc mọi người buổi sáng tốt lành, một ngáy săn mã thuận lợi !!!!"
+    },
     {
       "id": "ny31eme3az",
       "at": "2026-11-20T17:06:33.659Z",
@@ -48,7 +53,6 @@ const VOUCHERS = [
     "maximum": "500k",
     "tag": "ShopeeVIP",
     "link": "https://s.shopee.vn/3B97mWAYN9",
-    "featured": true,
     "used": 100
   },
   {
@@ -57,7 +61,8 @@ const VOUCHERS = [
     "discount": "Giảm 150k",
     "minimum": "0đ",
     "link": "https://s.shopee.vn/AKcCRapcDs",
-    "used": 89
+    "used": 89,
+    "featured": true
   },
   {
     "platform": "shopee",
