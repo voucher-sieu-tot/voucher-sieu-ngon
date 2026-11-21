@@ -17,12 +17,17 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-21T15:54:52.226Z",
+  "updated": "2026-11-21T17:24:59.481Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
+    {
+      "id": "hhxtxchm2b",
+      "at": "2026-11-21T17:24:57.971Z",
+      "text": "Back mã người mới NEWUSERIZJ4C giảm 100K/0Đ acc mới - siêu hội shopee. Anh chị em nào chưa múc được 500k/0đ thì húp tạm nhé 🐱🐱🐱"
+    },
     {
       "id": "4d6mg59oju",
       "at": "2026-11-21T15:54:49.098Z",
