@@ -590,7 +590,7 @@
   });
 
   /* ---------- Thống kê lượt truy cập (GoatCounter) ---------- */
-  function clearStats() { $("gToken").value = ""; $("chart").textContent = ""; $("claims").hidden = true; $("claimsBody").textContent = ""; $("statsSummary").textContent = ""; setMsg($("statsError"), ""); }
+  function clearStats() { $("gToken").value = ""; $("chart").textContent = ""; $("claims").hidden = true; $("claimsBody").textContent = ""; $("topBody").textContent = ""; $("statsSummary").textContent = ""; setMsg($("statsError"), ""); }
   function drawChart(days) {
     var NS = "http://www.w3.org/2000/svg", W = 640, H = 240, L = 36, B = 28, T = 12, R = 8;
     var max = Math.max.apply(null, days.map(function (d) { return d.n; }).concat([1]));
@@ -631,7 +631,8 @@
       var res = await fetch("https://" + code + ".goatcounter.com/api/v0/stats/hits" + query + "&limit=100", { headers: { Authorization: "Bearer " + token } });
       if (!res.ok) throw new Error("x");
       var json = await res.json();
-      var sums = { "Nổi bật": 0, "Thường": 0, "Chưa phân loại": 0 };
+      var sums = { "Nổi bật": 0, "Thường": 0, "Chưa phân loại": 0 }, byV = {};
+      $("topBody").textContent = "";
       (Array.isArray(json.hits) ? json.hits : []).forEach(function (h) {
         var p = h && typeof h.path === "string" ? h.path : "";
         if (p.indexOf("click/") !== 0) return;
@@ -639,7 +640,22 @@
         if (label.indexOf("Nổi bật | ") === 0) sums["Nổi bật"] += n;
         else if (label.indexOf("Thường | ") === 0) sums["Thường"] += n;
         else sums["Chưa phân loại"] += n;
+        var rest = label.replace(/^(Nổi bật|Thường) \| /, "");
+        byV[rest] = (byV[rest] || 0) + n;
       });
+      var top = Object.keys(byV).sort(function (x, y) { return byV[y] - byV[x]; }).slice(0, 10);
+      if (!top.length) {
+        var er = document.createElement("tr"), ec = document.createElement("td");
+        ec.colSpan = 3; ec.textContent = "Chưa có lượt bấm nào trong khoảng này."; er.appendChild(ec); $("topBody").appendChild(er);
+      }
+      top.forEach(function (k, i) {
+        var tr = document.createElement("tr");
+        [String(i + 1), k.split(" | ").join(" · "), String(byV[k])].forEach(function (t) {
+          var td = document.createElement("td"); td.textContent = t; tr.appendChild(td);
+        });
+        $("topBody").appendChild(tr);
+      });
+
       var rows = [["Mã nổi bật", sums["Nổi bật"]], ["Mã thường", sums["Thường"]]];
       if (sums["Chưa phân loại"] > 0) rows.push(["Chưa phân loại (bấm từ bản web cũ)", sums["Chưa phân loại"]]);
       rows.forEach(function (r) {
@@ -699,10 +715,87 @@
     }
   });
 
+  /* ---------- Sao lưu, khôi phục và lịch sử ---------- */
+  function loadIntoEditor(text, label) {
+    var parsed = parseData(text); // báo lỗi rõ nếu file sai định dạng
+    var items = parsed.list.filter(function (v) { return v && typeof v === "object"; });
+    var msg = "Nạp " + label + " (" + items.length + " voucher) vào trang?\nDanh sách và cài đặt đang hiện sẽ được thay thế. Web chưa đổi cho đến khi bạn bấm “Lưu & đăng lên web”.";
+    if (!confirm(msg)) return false;
+    state.list = items;
+    state.settings = parsed.settings;
+    render();
+    updateToolbar();
+    return true;
+  }
+  $("bkDownload").addEventListener("click", function () {
+    if (!state.list) return;
+    var d = new Date(), p2 = function (n) { return String(n).padStart(2, "0"); };
+    var name = "vouchers-data-" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + "-" + p2(d.getHours()) + p2(d.getMinutes()) + ".js";
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([serialize()], { type: "text/javascript" }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    $("bkMsg").textContent = "Đã tạo file " + name + " (kiểm tra thư mục tải xuống).";
+  });
+  $("bkPick").addEventListener("click", function () { $("bkFile").click(); });
+  $("bkFile").addEventListener("change", async function () {
+    var f = $("bkFile").files && $("bkFile").files[0];
+    $("bkFile").value = "";
+    if (!f || !state.list) return;
+    $("bkMsg").textContent = "";
+    if (f.size > 2 * 1024 * 1024) { $("bkMsg").textContent = "File quá lớn, không phải file sao lưu của web này."; return; }
+    try {
+      var ok = loadIntoEditor(await f.text(), "file “" + f.name + "”");
+      $("bkMsg").textContent = ok ? "Đã nạp file. Kiểm tra lại rồi bấm “Lưu & đăng lên web” nếu muốn dùng bản này." : "Đã hủy, không thay đổi gì.";
+    } catch (e) {
+      $("bkMsg").textContent = e && e.message ? e.message : "Không đọc được file.";
+    }
+  });
+  $("hLoad").addEventListener("click", async function () {
+    if (!state.token || !state.cfg) return;
+    var ul = $("hList"), msg = $("hMsg");
+    ul.textContent = ""; msg.textContent = "Đang tải…";
+    $("hLoad").disabled = true;
+    try {
+      var items = await gh(state.token, state.cfg, "GET", "/commits?path=" + encodeURIComponent(DATA_PATH) + "&sha=" + encodeURIComponent(state.cfg.branch) + "&per_page=20");
+      if (!Array.isArray(items) || !items.length) { msg.textContent = "Chưa có lịch sử."; return; }
+      msg.textContent = "";
+      items.forEach(function (c, i) {
+        var li = document.createElement("li");
+        var main = el("div", "h-main");
+        var when = c && c.commit && c.commit.author && c.commit.author.date;
+        main.appendChild(el("span", "h-time", (when ? fmtTime(when) : "Không rõ thời gian") + (i === 0 ? " (mới nhất)" : "")));
+        var m = String((c && c.commit && c.commit.message) || "").split("\n")[0].slice(0, 90);
+        main.appendChild(el("span", "muted small", m || "(không có ghi chú)"));
+        li.appendChild(main);
+        var b = el("button", "btn btn-ghost btn-sm", "Nạp bản này");
+        b.type = "button";
+        b.addEventListener("click", async function () {
+          b.disabled = true; msg.textContent = "Đang tải bản cũ…";
+          try {
+            var f = await gh(state.token, state.cfg, "GET", "/contents/" + DATA_PATH + "?ref=" + encodeURIComponent(c.sha));
+            var ok = loadIntoEditor(dec.decode(fromB64(String(f.content).replace(/\s/g, ""))), "bản ngày " + (when ? fmtTime(when) : "cũ"));
+            msg.textContent = ok ? "Đã nạp bản cũ. Bấm “Lưu & đăng lên web” để dùng bản này." : "Đã hủy, không thay đổi gì.";
+          } catch (e) {
+            var x = explain(e);
+            msg.textContent = x === "CONFLICT" ? "Không tải được bản này." : x;
+          } finally { b.disabled = false; }
+        });
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+    } catch (e) {
+      var x = explain(e);
+      msg.textContent = x === "CONFLICT" ? "Không tải được lịch sử." : x;
+    } finally { $("hLoad").disabled = false; }
+  });
+
   /* ---------- Tin mới ---------- */
   function renderNews() {
     $("newsBox").hidden = false;
     $("statsBox").hidden = false;
+    $("backupBox").hidden = false;
     var ul = $("newsAdminList");
     ul.textContent = "";
     var items = state.settings.news.slice().sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });

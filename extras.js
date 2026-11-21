@@ -207,56 +207,84 @@
     document.documentElement.classList.add("maint");
   }
 
-  /* ---- Mã QR của web ---- */
+  /* ---- Mã QR (của web và của từng voucher), có tên và logo DealNest bên dưới ---- */
   var qrBtn = document.getElementById("qrBtn"), qrDlg = document.getElementById("qrDlg");
-  if (qrBtn && qrDlg && window.DealNestQR && typeof qrDlg.showModal === "function") {
-    var qrUrl = function () { return (location.origin + location.pathname).replace(/index\.html$/, "") || location.href; };
-    var qrObj = null;
-    qrBtn.addEventListener("click", function () {
-      var url = location.protocol === "file:" ? location.href : qrUrl();
-      try { qrObj = window.DealNestQR.make(url); } catch (e) { qrObj = null; }
-      var box = document.getElementById("qrBox");
+  if (qrDlg && window.DealNestQR && typeof qrDlg.showModal === "function") {
+    var qrCur = null; // { text, obj, caption, file }
+    var qrSiteUrl = function () { return location.protocol === "file:" ? location.href : ((location.origin + location.pathname).replace(/index\.html$/, "") || location.href); };
+    var qrSiteName = typeof SITE_NAME === "string" && SITE_NAME ? SITE_NAME : "DealNest";
+    var openQR = function (opt) {
+      var box = document.getElementById("qrBox"), obj = null;
       box.textContent = "";
-      document.getElementById("qrUrl").textContent = url;
-      if (!qrObj) { box.textContent = "Địa chỉ quá dài để tạo mã QR."; qrDlg.showModal(); return; }
-      var n = qrObj.size, q = 4, NS = "http://www.w3.org/2000/svg";
+      document.getElementById("qrTitle").textContent = opt.title || "Quét để mở web";
+      document.getElementById("qrUrl").textContent = opt.text;
+      document.getElementById("qrCap").textContent = opt.caption || "";
+      document.getElementById("qrCap").hidden = !opt.caption;
+      document.getElementById("qrBrandName").textContent = qrSiteName;
+      try { obj = window.DealNestQR.make(opt.text); } catch (err) { obj = null; }
+      qrCur = obj ? { text: opt.text, obj: obj, caption: opt.caption || "", file: opt.file || "qr-dealnest" } : null;
+      document.getElementById("qrDl").disabled = !obj;
+      if (!obj) { box.textContent = "Link quá dài để tạo mã QR."; qrDlg.showModal(); return; }
+      var n = obj.size, q = 4, NS = "http://www.w3.org/2000/svg";
       var svg = document.createElementNS(NS, "svg");
       svg.setAttribute("viewBox", "0 0 " + (n + 2 * q) + " " + (n + 2 * q));
       svg.setAttribute("role", "img");
-      svg.setAttribute("aria-label", "Mã QR dẫn tới " + url);
+      svg.setAttribute("aria-label", "Mã QR dẫn tới " + opt.text);
       svg.setAttribute("shape-rendering", "crispEdges");
       var bg = document.createElementNS(NS, "rect");
       bg.setAttribute("width", n + 2 * q); bg.setAttribute("height", n + 2 * q); bg.setAttribute("fill", "#fff");
       svg.appendChild(bg);
       var d = "";
-      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (qrObj.get(x, y)) d += "M" + (x + q) + " " + (y + q) + "h1v1h-1z";
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (obj.get(x, y)) d += "M" + (x + q) + " " + (y + q) + "h1v1h-1z";
       var path = document.createElementNS(NS, "path");
       path.setAttribute("d", d); path.setAttribute("fill", "#000");
       svg.appendChild(path);
       box.appendChild(svg);
       qrDlg.showModal();
-    });
+    };
+    window.DealNestShowQR = openQR;
+    if (qrBtn) qrBtn.addEventListener("click", function () { openQR({ text: qrSiteUrl(), title: "Quét để mở web", file: "qr-dealnest" }); });
     document.getElementById("qrClose").addEventListener("click", function () { qrDlg.close(); });
     document.getElementById("qrCopy").addEventListener("click", function () {
       var u = document.getElementById("qrUrl").textContent;
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).catch(function () {});
     });
     document.getElementById("qrDl").addEventListener("click", function () {
-      if (!qrObj) return;
-      var n = qrObj.size, q = 4, S = Math.max(8, Math.floor(1024 / (n + 2 * q)));
+      if (!qrCur) return;
+      var cur = qrCur, obj = cur.obj, n = obj.size, q = 4, S = Math.max(8, Math.floor(1024 / (n + 2 * q))), W = (n + 2 * q) * S;
+      var FONT = "system-ui, 'Segoe UI', Roboto, Arial, sans-serif";
       var cv = document.createElement("canvas");
-      cv.width = cv.height = (n + 2 * q) * S;
+      cv.width = W; cv.height = W + (cur.caption ? 300 : 230);
       var ctx = cv.getContext("2d");
       ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
       ctx.fillStyle = "#000";
-      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (qrObj.get(x, y)) ctx.fillRect((x + q) * S, (y + q) * S, S, S);
-      cv.toBlob(function (blob) {
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "qr-web.png";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-      }, "image/png");
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (obj.get(x, y)) ctx.fillRect((x + q) * S, (y + q) * S, S, S);
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      if (cur.caption) {
+        var fs = 52; ctx.font = "700 " + fs + "px " + FONT;
+        while (ctx.measureText(cur.caption).width > W - 80 && fs > 24) { fs -= 2; ctx.font = "700 " + fs + "px " + FONT; }
+        ctx.fillStyle = "#44403c"; ctx.fillText(cur.caption, W / 2, W + 40);
+      }
+      var by = W + (cur.caption ? 100 : 40), L = 110;
+      ctx.font = "800 84px " + FONT;
+      var tw = ctx.measureText(qrSiteName).width, x0 = (W - (L + 24 + tw)) / 2;
+      var finish = function (img) {
+        if (img) ctx.drawImage(img, x0, by, L, L);
+        ctx.textAlign = "left"; ctx.fillStyle = "#ee4d2d"; ctx.font = "800 84px " + FONT;
+        ctx.fillText(qrSiteName, x0 + (img ? L + 24 : 0), by + 82);
+        cv.toBlob(function (blob) {
+          if (!blob) return;
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = cur.file + ".png";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        }, "image/png");
+      };
+      var logo = new Image();
+      logo.onload = function () { finish(logo); };
+      logo.onerror = function () { x0 = (W - tw) / 2; finish(null); };
+      logo.src = "images/icon-192.png";
     });
   }
 

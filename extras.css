@@ -246,3 +246,11 @@
 .since-box[hidden] { display: none; }
 .since-x { margin-left: auto; border: 0; background: transparent; font-size: 1.2rem; line-height: 1; cursor: pointer; color: var(--ink-mute); }
 [data-theme="dark"] .qr-dlg { background: #211b17; }
+
+.exp.soon { color: #dc2626; font-weight: 700; }
+[data-theme="dark"] .exp.soon { color: #fca5a5; }
+.tool:disabled { opacity: .6; cursor: progress; }
+.qr-brand { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: .6rem; font-size: 1.2rem; color: var(--shopee); }
+.qr-brand img { border-radius: 9px; display: block; }
+.qr-cap { margin: .6rem 0 0; font-weight: 700; font-size: .95rem; }
+.qr-url { word-break: break-all; max-height: 4.5em; overflow: auto; }

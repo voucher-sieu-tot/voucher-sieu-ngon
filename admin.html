@@ -222,7 +222,28 @@
             <p class="tiny">Đếm số lần khách bấm nút <b>Lấy voucher</b> (web không biết khách có dùng mã thành công hay không). Tính trên số lượt truy cập cùng khoảng thời gian. Chỉ tính các lượt bấm từ bản web này trở đi.</p>
             <table class="claims-t"><thead><tr><th>Loại</th><th>Lượt bấm</th><th>Trên 100 lượt truy cập</th></tr></thead><tbody id="claimsBody"></tbody></table>
             <p id="claimsNote" class="muted small"></p>
+            <h3 class="claims-h">Voucher được bấm nhiều nhất</h3>
+            <table class="claims-t top-t"><thead><tr><th>#</th><th>Voucher</th><th>Lượt bấm</th></tr></thead><tbody id="topBody"></tbody></table>
           </div>
+        </details>
+
+        <details id="backupBox" class="settings" hidden>
+          <summary>Sao lưu &amp; lịch sử thay đổi</summary>
+          <p class="tiny">
+            <b>Sao lưu:</b> tải về file chứa toàn bộ voucher và cài đặt đang hiện trong trang này (gồm cả phần bạn chưa lưu).
+            <b>Khôi phục:</b> chọn lại file đó, dữ liệu được nạp vào trang để bạn xem lại; chỉ khi bấm <b>Lưu &amp; đăng lên web</b> thì web mới đổi.
+          </p>
+          <div class="toolbar">
+            <button id="bkDownload" type="button" class="btn btn-ghost btn-sm">Tải file sao lưu</button>
+            <button id="bkPick" type="button" class="btn btn-ghost btn-sm">Khôi phục từ file…</button>
+            <input id="bkFile" type="file" accept=".js,.txt,.json" hidden />
+          </div>
+          <p id="bkMsg" class="muted small" role="status"></p>
+          <h3 class="claims-h">Lịch sử các lần lưu</h3>
+          <p class="tiny">Lấy từ lịch sử GitHub (20 lần gần nhất). Bấm “Nạp bản này” để đưa bản cũ vào trang; web chỉ đổi khi bạn bấm Lưu.</p>
+          <button id="hLoad" type="button" class="btn btn-ghost btn-sm">Tải lịch sử</button>
+          <p id="hMsg" class="muted small" role="status"></p>
+          <ul id="hList" class="hist"></ul>
         </details>
 
         <details id="newsBox" class="settings" hidden>

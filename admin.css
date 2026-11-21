@@ -117,3 +117,10 @@ input.invalid { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, .
 .claims-t { width: 100%; border-collapse: collapse; margin: .5rem 0; font-size: .9rem; }
 .claims-t th, .claims-t td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid #e7e5e4; }
 .claims-t td:nth-child(2), .claims-t td:nth-child(3), .claims-t th:nth-child(2), .claims-t th:nth-child(3) { text-align: right; }
+.top-t td:first-child, .top-t th:first-child { width: 2rem; text-align: left; }
+.top-t td:nth-child(2), .top-t th:nth-child(2) { text-align: left; word-break: break-word; }
+.top-t td:nth-child(3), .top-t th:nth-child(3) { text-align: right; width: 5rem; }
+.hist { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.hist li { display: flex; gap: .6rem; align-items: center; justify-content: space-between; border-bottom: 1px solid #e7e5e4; padding: .4rem 0; font-size: .85rem; }
+.hist .h-main { min-width: 0; word-break: break-word; }
+.hist .h-time { font-weight: 700; display: block; }

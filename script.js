@@ -28,6 +28,28 @@
     return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
 
+
+  /* Hạn dùng: dưới 24 giờ thì hiện đếm ngược "Còn X giờ Y phút" */
+  function expLabel(d) {
+    var ms = d.getTime() - Date.now();
+    if (ms <= 0) return { text: "Đã hết hạn", soon: false };
+    if (ms < 864e5) {
+      var mins = Math.max(1, Math.ceil(ms / 6e4)), h = Math.floor(mins / 60), m = mins % 60;
+      return { text: ("Còn " + (h ? h + " giờ " : "") + (m || !h ? m + " phút" : "")).trim(), soon: true };
+    }
+    return { text: "HSD " + fmtDate(d), soon: false };
+  }
+  function paintExp(node) {
+    if (!node._d || !node._t) return;
+    var r = expLabel(node._d);
+    node._t.nodeValue = r.text;
+    node.classList.toggle("soon", r.soon);
+  }
+  setInterval(function () {
+    var list = document.querySelectorAll(".exp");
+    for (var i = 0; i < list.length; i++) paintExp(list[i]);
+  }, 60000);
+
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -116,6 +138,94 @@
     return (typeof PLATFORM_IMAGES === "object" && PLATFORM_IMAGES[v.platform]) || "";
   }
 
+
+  /* ---------- Ảnh chia sẻ cho từng voucher (vẽ ngay trên trình duyệt) ---------- */
+  function wrapLines(ctx, text, maxW, maxLines) {
+    var words = String(text).split(/\s+/), lines = [], cur = "";
+    words.forEach(function (w) {
+      var t = cur ? cur + " " + w : w;
+      if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t;
+    });
+    if (cur) lines.push(cur);
+    if (lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] = lines[maxLines - 1].replace(/.?$/, "…"); }
+    return lines;
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function shareImageBlob(v, expDate) {
+    return new Promise(function (resolve, reject) {
+      var W = 1080, H = 1350, FONT = "system-ui, 'Segoe UI', Roboto, Arial, sans-serif";
+      var c = document.createElement("canvas"); c.width = W; c.height = H;
+      var ctx = c.getContext("2d");
+      if (!ctx) return reject(new Error("canvas"));
+      var tiktok = v.platform === "tiktok";
+      var g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, tiktok ? "#1b1b2f" : "#ff7a45"); g.addColorStop(1, tiktok ? "#050505" : "#ee4d2d");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      var accent = tiktok ? "#fe2c55" : "#ee4d2d";
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#fff"; ctx.font = "800 60px " + FONT;
+      ctx.fillText(typeof SITE_NAME === "string" ? SITE_NAME : "DealNest", W / 2, 150);
+      ctx.font = "600 34px " + FONT; ctx.globalAlpha = 0.85;
+      ctx.fillText("Voucher " + (NAMES[v.platform] || ""), W / 2, 205); ctx.globalAlpha = 1;
+      var x = 90, y = 260, w = 900, h = 800;
+      ctx.shadowColor = "rgba(0,0,0,.25)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16;
+      ctx.fillStyle = "#fff"; roundRect(ctx, x, y, w, h, 48); ctx.fill();
+      ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.fillStyle = accent; ctx.font = "800 40px " + FONT;
+      ctx.fillText((v.featured ? "★ NỔI BẬT · " : "") + (NAMES[v.platform] || "").toUpperCase(), W / 2, y + 100);
+      var size = 150, lines, dtext = String(v.discount || "");
+      ctx.font = "900 " + size + "px " + FONT;
+      while (ctx.measureText(dtext).width > w - 100 && size > 96) { size -= 6; ctx.font = "900 " + size + "px " + FONT; }
+      if (ctx.measureText(dtext).width > w - 100) { size = 84; ctx.font = "900 " + size + "px " + FONT; lines = wrapLines(ctx, dtext, w - 100, 2); }
+      else lines = [dtext];
+      ctx.fillStyle = "#1c1917";
+      var ly = y + (lines.length === 1 ? 300 : 250), lh = size + 10;
+      lines.forEach(function (l, i) { ctx.fillText(l, W / 2, ly + i * lh); });
+      ctx.fillStyle = "#57534e"; ctx.font = "500 40px " + FONT;
+      var ty = ly + (lines.length - 1) * lh + 80;
+      wrapLines(ctx, v.title || "", w - 120, 2).forEach(function (l, i) { ctx.fillText(l, W / 2, ty + i * 52); });
+      var py = y + 560;
+      ctx.strokeStyle = "#d6d3d1"; ctx.lineWidth = 4; ctx.setLineDash([16, 14]);
+      ctx.beginPath(); ctx.moveTo(x + 50, py); ctx.lineTo(x + w - 50, py); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = tiktok ? "#0b0b14" : "#ee4d2d";
+      [x, x + w].forEach(function (cx) { ctx.beginPath(); ctx.arc(cx, py, 30, 0, Math.PI * 2); ctx.fill(); });
+      var rows = [];
+      if (v.minimum) rows.push("Đơn tối thiểu: " + v.minimum);
+      if (v.maximum) rows.push("Giảm tối đa: " + v.maximum);
+      if (expDate) rows.push("HSD: " + fmtDate(expDate));
+      ctx.fillStyle = "#1c1917"; ctx.font = "600 42px " + FONT;
+      rows.slice(0, 3).forEach(function (r, i) { ctx.fillText(r, W / 2, py + 80 + i * 64); });
+      var site = (location.host + location.pathname).replace(/index\.html$/, "").replace(/\/$/, "");
+      ctx.fillStyle = "#fff"; ctx.font = "600 38px " + FONT; ctx.fillText("Xem và lấy mã tại", W / 2, 1150);
+      var fs = 54; ctx.font = "800 " + fs + "px " + FONT;
+      while (ctx.measureText(site).width > W - 120 && fs > 24) { fs -= 2; ctx.font = "800 " + fs + "px " + FONT; }
+      ctx.fillText(site, W / 2, 1225);
+      ctx.globalAlpha = 0.8; ctx.font = "500 30px " + FONT; ctx.fillText("Điều kiện áp dụng xem trong ứng dụng", W / 2, 1295); ctx.globalAlpha = 1;
+      c.toBlob(function (b) { b ? resolve(b) : reject(new Error("blob")); }, "image/png");
+    });
+  }
+  function shareImage(v, expDate, btn) {
+    btn.disabled = true;
+    shareImageBlob(v, expDate).then(function (blob) {
+      var name = "dealnest-" + String(v.discount || "voucher").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png";
+      var file = null;
+      try { file = new File([blob], name, { type: "image/png" }); } catch (e) { /* trình duyệt cũ */ }
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: (NAMES[v.platform] || "Voucher") + ": " + v.discount }).catch(function () {});
+      }
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      toast("Đã tạo ảnh, kiểm tra thư mục tải xuống");
+    }).catch(function () { toast("Không tạo được ảnh trên trình duyệt này"); })
+      .then(function () { btn.disabled = false; });
+  }
+
   /* ---------- Thanh phần trăm đã dùng (chỉ khi có số liệu thật) ---------- */
   function buildUsage(v) {
     var real = typeof v.used === "number" && v.used >= 0 && v.used <= 100;
@@ -202,9 +312,9 @@
     exp.appendChild(svg(ICON.cal, 14));
     var expDate = parseExpiry(v.expires);
     var expired = expDate ? expDate.getTime() < Date.now() : false;
-    var expText = document.createTextNode(expDate ? (expired ? "Đã hết hạn" : "HSD " + fmtDate(expDate)) : "Không có hạn dùng");
+    var expText = document.createTextNode(expDate ? expLabel(expDate).text : "Không có hạn dùng");
     exp.appendChild(expText);
-    if (expDate) foot.appendChild(exp);
+    if (expDate) { exp._d = expDate; exp._t = expText; paintExp(exp); foot.appendChild(exp); }
     else foot.className += " solo";
 
     var url = safeUrl(v.link);
@@ -265,6 +375,15 @@
         copyBtn.type = "button";
         copyBtn.addEventListener("click", function () { copyText(url); });
         tools.appendChild(copyBtn);
+        var qrBtnV = el("button", "tool", "Mã QR");
+        qrBtnV.type = "button";
+        qrBtnV.setAttribute("aria-label", "Hiện mã QR của voucher này");
+        qrBtnV.addEventListener("click", function () {
+          if (typeof window.DealNestShowQR !== "function") { toast("Trình duyệt này chưa hỗ trợ hiện mã QR"); return; }
+          var slug = String(v.discount || "voucher").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          window.DealNestShowQR({ text: url, title: "Quét để lấy voucher", caption: (NAMES[v.platform] || "Voucher") + " · " + v.discount, file: "qr-dealnest-" + slug });
+        });
+        tools.appendChild(qrBtnV);
         if (navigator.share) {
           var shareBtn = el("button", "tool", "Chia sẻ");
           shareBtn.type = "button";
@@ -274,6 +393,13 @@
           });
           tools.appendChild(shareBtn);
         }
+      }
+      if (!expired) {
+        var imgBtn = el("button", "tool", "Tạo ảnh");
+        imgBtn.type = "button";
+        imgBtn.setAttribute("aria-label", "Tạo ảnh chia sẻ cho voucher này");
+        imgBtn.addEventListener("click", function () { shareImage(v, expDate, imgBtn); });
+        tools.appendChild(imgBtn);
       }
       if (reportUrl) {
         var rep = el("a", "tool", "Báo mã hết");

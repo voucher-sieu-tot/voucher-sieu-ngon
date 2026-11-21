@@ -121,7 +121,7 @@ Lưu ý: kho lưu và lịch nằm trong `vouchers-data.js`, là file công khai
 - **Câu hỏi thường gặp**: sửa nội dung trong `index.html` (mục `id="faq"`). Nếu sửa, hãy sửa cả khối dữ liệu `application/ld+json` ở đầu file để Google hiểu đúng.
 - **Thêm nhắc giờ vào lịch**: tải file `.ics` gồm 6 lịch lặp hằng ngày (0h, 9h, 12h, 15h, 18h, 21h giờ Việt Nam), nhắc trước 5 phút.
 - **Cài web lên màn hình chính** (PWA): có nút "Cài web" trên trình duyệt hỗ trợ; trên iPhone có dòng hướng dẫn ở chân trang. Cần chạy qua `https` (GitHub Pages). Web luôn ưu tiên bản mới nhất, chỉ dùng bản lưu khi mất mạng.
-- **Ảnh xem trước khi chia sẻ link (Zalo, Facebook)**: mở `index.html`, thay `TEN-BAN` và `TEN-KHO` trong hai dòng `og:image` và `twitter:image` bằng tên tài khoản và tên kho GitHub của bạn. Ví dụ `https://nguyenvan.github.io/voucher/images/og.png`. Không thay thì ảnh xem trước sẽ không hiện. Ảnh nằm ở `images/og.png` (1200x630), bạn có thể thay bằng ảnh của mình.
+- **Ảnh xem trước khi chia sẻ link (Zalo, Facebook)**: mở `index.html`, thay `TEN-BAN` và `TEN-KHO` trong hai dòng `og:image` và `twitter:image` bằng tên tài khoản và tên kho GitHub của bạn. Ví dụ `https://nguyenvan.github.io/voucher/images/og.png`. Bản gửi cho bạn đã điền sẵn địa chỉ `https://voucher-sieu-tot.github.io/voucher-sieu-ngon/`; chỉ cần sửa nếu bạn đổi tên tài khoản hoặc kho. Ảnh nằm ở `images/og.png` (1200x630), bạn có thể thay bằng ảnh của mình.
 
 ### Admin: nhân bản và kéo thả
 
@@ -157,3 +157,22 @@ Lưu ý: chỉ đếm từ lúc GoatCounter bắt đầu chạy; khóa API chỉ
 
 ## Lượng mã đã lấy (trong admin, mục Thống kê)
 Sau khi bấm "Xem thống kê", bên dưới biểu đồ có bảng **Mã nổi bật / Mã thường**: số lần khách bấm nút "Lấy voucher" và số lần bấm trên mỗi 100 lượt truy cập cùng khoảng thời gian. Đây là số thật lấy từ GoatCounter, không phải số giả. Web không biết khách có dùng mã thành công hay không, nên đây là lượt bấm. Các lượt bấm từ bản web cũ (chưa phân loại nổi bật/thường) được gom riêng một dòng.
+
+## Sao lưu, khôi phục và lịch sử (admin, mục "Sao lưu & lịch sử thay đổi")
+- **Tải file sao lưu:** tải về toàn bộ voucher và cài đặt đang hiện trong trang admin (gồm cả phần chưa lưu).
+- **Khôi phục từ file:** chọn lại file sao lưu, dữ liệu được nạp vào trang để xem lại. Web chỉ đổi khi bấm "Lưu & đăng lên web". Bấm "Bỏ thay đổi" để quay lại.
+- **Lịch sử các lần lưu:** lấy 20 lần lưu gần nhất từ GitHub. Bấm "Nạp bản này" để đưa bản cũ vào trang, rồi Lưu nếu muốn dùng. Lịch sử cũ vẫn được giữ trên GitHub.
+
+## Đếm ngược hạn dùng
+Voucher có ngày hết hạn mà còn dưới 24 giờ sẽ hiện "Còn X giờ Y phút" màu đỏ, tự cập nhật mỗi phút. Hạn dùng tính đến hết ngày đã nhập.
+
+## Ảnh chia sẻ cho từng voucher
+Mỗi thẻ còn hạn có nút **Tạo ảnh**: vẽ một ảnh 1080x1350 (tên nền tảng, mức giảm, điều kiện, hạn dùng, địa chỉ web). Trên điện thoại sẽ mở bảng chia sẻ, trên máy tính sẽ tải ảnh PNG về. Ảnh không chứa link affiliate, chỉ có địa chỉ web của bạn.
+
+## Voucher được bấm nhiều nhất (admin, mục Thống kê)
+Sau khi bấm "Xem thống kê", bảng "Voucher được bấm nhiều nhất" liệt kê 10 voucher có nhiều lượt bấm nút "Lấy voucher" nhất (số thật từ GoatCounter, gộp lượt bấm ở mục nổi bật và mục thường).
+
+## Mã QR có tên và logo DealNest
+- **QR của web** (nút "Mã QR" ở cuối trang) và **QR của từng voucher** (nút "Mã QR" trên mỗi thẻ còn hạn) đều hiện logo và chữ DealNest ở dưới. Ảnh PNG tải về cũng có logo, chữ DealNest và tên voucher (với QR voucher) nằm ngoài vùng mã nên vẫn quét được.
+- QR voucher dẫn thẳng tới link bạn đã nhập cho voucher đó. Link quá dài (hơn khoảng 200 ký tự) sẽ không tạo được mã.
+- Tên hiển thị lấy từ `SITE_NAME` trong `vouchers.js`; logo là `images/icon-192.png`.
