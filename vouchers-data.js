@@ -17,12 +17,17 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-21T17:24:59.481Z",
+  "updated": "2026-11-22T10:17:04.673Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
+    {
+      "id": "reerzhn1c1",
+      "at": "2026-11-22T10:16:57.217Z",
+      "text": "NEWUSERNOVGAMEAERBXF giảm 100K/0Đ acc mới - thợ săn. 😍😍😍"
+    },
     {
       "id": "hhxtxchm2b",
       "at": "2026-11-21T17:24:57.971Z",
