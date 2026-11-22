@@ -17,12 +17,17 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-22T10:17:04.673Z",
+  "updated": "2026-11-22T17:12:11.217Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
+    {
+      "id": "4oa1z2gxz9",
+      "at": "2026-11-22T17:12:07.173Z",
+      "text": "BACK MÃ 100K/0Đ ACC MỚI - NEWUSERIZJ4C giảm 100K/0Đ acc mới - siêu hội 🎁🎁"
+    },
     {
       "id": "reerzhn1c1",
       "at": "2026-11-22T10:16:57.217Z",
