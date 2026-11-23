@@ -17,12 +17,17 @@ const SITE_SETTINGS = {
   "stash": [],
   "schedule": [],
   "reportUrl": "",
-  "updated": "2026-11-22T17:12:11.217Z",
+  "updated": "2026-11-23T14:37:10.063Z",
   "maintenance": {
     "enabled": false,
     "message": ""
   },
   "news": [
+    {
+      "id": "9gs1nnddtz",
+      "at": "2026-11-23T14:37:03.431Z",
+      "text": "‼️Giảm 100K mã tag ( back lúc 0H)    NEWUSERIZJ4C  - siêu hội shopee   nhập tại: https://s.shopee.vn/3LSdK5IWdX  ➡️ Lưu mã giảm 100K/0Đ cho ACC MỚI tại các banner sau: 1. https://s.shopee.vn/5LDhhjhcL"
+    },
     {
       "id": "4oa1z2gxz9",
       "at": "2026-11-22T17:12:07.173Z",
